@@ -212,11 +212,11 @@ Pinocchio is a lightweight library that allows you to write Solana programs with
 git clone https://github.com/yourusername/solana-pinocchio-examples.git
 cd solana-pinocchio-examples
 
-# go to example directory
-cd example_program
 
 # Build the program
 cargo build-sbf
+# or
+cargo-build-sbf
 
 # Run tests
 cargo test
