@@ -42,3 +42,4 @@ ehthumbs.db
 **/*.log
 
 .env*
+/node_modules
