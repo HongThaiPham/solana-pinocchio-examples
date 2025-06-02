@@ -1,6 +1,12 @@
 [workspace]
 resolver = "2"
-members = ["basics/*", "compression/*", "oracles/*", "tokens/*"]
+members = [
+  "basics/*",
+  "compression/*",
+  "oracles/*",
+  "pinocchio-helper",
+  "tokens/*",
+]
 
 [workspace.package]
 edition = "2021"
@@ -13,6 +19,8 @@ rust-version = "1.79"
 pinocchio = "0.8.4"
 pinocchio-pubkey = "0.2.4"
 pinocchio-log = "0.4.0"
+pinocchio-system = "0.2.3"
+bytemuck = { version = "1.23.0", features = ["derive", "min_const_generics"] }
 
 mollusk-svm = "0.1.5"
 solana-sdk = "2.2.2"
