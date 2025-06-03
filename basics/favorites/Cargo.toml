@@ -1,0 +1,23 @@
+[package]
+name = "favorites"
+version = "0.1.0"
+edition = "2021"
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+[dependencies]
+pinocchio = { workspace = true }
+pinocchio-log = { workspace = true }
+pinocchio-pubkey = { workspace = true }
+pinocchio-system = { workspace = true }
+pinocchio-helper = { path = "../../pinocchio-helper" }
+bytemuck = { workspace = true }
+
+
+[dev-dependencies]
+mollusk-svm = { workspace = true }
+solana-sdk = { workspace = true }
