@@ -27,23 +27,19 @@ mod tests {
         let owner = Pubkey::new_from_array([0x02; 32]);
         let owner_account = AccountSharedData::new(1 * LAMPORTS_PER_SOL, 0, &system_program);
 
-        let (counter_pubkey, bump) = solana_sdk::pubkey::Pubkey::find_program_address(
-            &[COUNTER_SEED, &owner.to_bytes()],
-            &PROGRAM_ID,
-        );
+        let (counter_pubkey, bump) =
+            solana_sdk::pubkey::Pubkey::find_program_address(&[COUNTER_SEED], &PROGRAM_ID);
         let counter_account = AccountSharedData::new(0, 0, &system_program);
 
         let counter_init_state = Counter {
-            maker: owner.to_bytes(),
             count: 100u64.to_le_bytes(),
-            bump,
         };
 
         // create counter instruction
         {
             let ix_data = CreateCounterInstructionData {
                 initial_value: counter_init_state.count,
-                bump: counter_init_state.bump,
+                bump,
             };
 
             let ix_data_bytes = bytemuck::bytes_of(&ix_data);
@@ -81,8 +77,6 @@ mod tests {
             let parsed_data = bytemuck::from_bytes::<Counter>(&updated_data.data);
 
             assert_eq!(parsed_data.count, 100u64.to_le_bytes());
-            assert_eq!(Pubkey::from(parsed_data.maker), owner);
-            assert_eq!(parsed_data.bump, bump);
             assert!(updated_data.owner.eq(&PROGRAM_ID));
 
             assert!(result.program_result == ProgramResult::Success);
@@ -99,15 +93,11 @@ mod tests {
         let owner = Pubkey::new_from_array([0x02; 32]);
         let owner_account = AccountSharedData::new(1 * LAMPORTS_PER_SOL, 0, &system_program);
 
-        let (counter_pubkey, bump) = solana_sdk::pubkey::Pubkey::find_program_address(
-            &[COUNTER_SEED, &owner.to_bytes()],
-            &PROGRAM_ID,
-        );
+        let (counter_pubkey, _) =
+            solana_sdk::pubkey::Pubkey::find_program_address(&[COUNTER_SEED], &PROGRAM_ID);
 
         let counter_init_state = Counter {
-            maker: *owner.as_array(),
             count: 100u64.to_le_bytes(),
-            bump,
         };
 
         // increase counter instruction
@@ -145,9 +135,7 @@ mod tests {
                         Check::account(&counter_pubkey).owner(&PROGRAM_ID).build(),
                         Check::account(&counter_pubkey)
                             .data(bytemuck::bytes_of(&Counter {
-                                maker: owner.to_bytes(),
                                 count: 101u64.to_le_bytes(),
-                                bump,
                             }))
                             .build(),
                     ],
@@ -172,15 +160,11 @@ mod tests {
         let owner = Pubkey::new_from_array([0x02; 32]);
         let owner_account = AccountSharedData::new(1 * LAMPORTS_PER_SOL, 0, &system_program);
 
-        let (counter_pubkey, bump) = solana_sdk::pubkey::Pubkey::find_program_address(
-            &[COUNTER_SEED, &owner.to_bytes()],
-            &PROGRAM_ID,
-        );
+        let (counter_pubkey, _) =
+            solana_sdk::pubkey::Pubkey::find_program_address(&[COUNTER_SEED], &PROGRAM_ID);
 
         let counter_init_state = Counter {
-            maker: *owner.as_array(),
             count: 100u64.to_le_bytes(),
-            bump,
         };
 
         // increase counter instruction
@@ -218,9 +202,7 @@ mod tests {
                         Check::account(&counter_pubkey).owner(&PROGRAM_ID).build(),
                         Check::account(&counter_pubkey)
                             .data(bytemuck::bytes_of(&Counter {
-                                maker: owner.to_bytes(),
                                 count: 99u64.to_le_bytes(),
-                                bump,
                             }))
                             .build(),
                     ],

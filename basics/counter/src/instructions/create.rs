@@ -84,11 +84,7 @@ impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for Create<'info> {
 
 impl<'info> Create<'info> {
     pub fn handler(&mut self) -> ProgramResult {
-        let seeds = &[
-            COUNTER_SEED,
-            self.accounts.maker.key().as_ref(),
-            &[self.instruction_datas.bump as u8],
-        ];
+        let seeds = &[COUNTER_SEED, &[self.instruction_datas.bump as u8]];
         let counter_pubkey = pubkey::create_program_address(seeds, &crate::ID)
             .map_err(|_| ProgramError::InvalidSeeds)?;
 
@@ -115,9 +111,7 @@ impl<'info> Create<'info> {
         };
 
         counter.set_inner(Counter {
-            maker: *self.accounts.maker.key(),
             count: self.instruction_datas.initial_value,
-            bump: self.instruction_datas.bump,
         });
         Ok(())
     }

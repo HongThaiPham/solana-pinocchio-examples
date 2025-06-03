@@ -78,16 +78,11 @@ impl<'info> Mutate<'info> {
             .map_err(|_| ProgramError::InvalidAccountData)?
         };
 
-        let seeds = &[COUNTER_SEED, self.accounts.maker.key().as_ref()];
-        let (counter_pubkey, bump) = pubkey::find_program_address(seeds, &crate::ID);
+        let seeds = &[COUNTER_SEED];
+        let (counter_pubkey, _) = pubkey::find_program_address(seeds, &crate::ID);
 
-        if self.accounts.counter.key().ne(&counter_pubkey) && counter.bump != bump {
+        if self.accounts.counter.key().ne(&counter_pubkey) {
             return Err(ProgramError::InvalidAccountData);
-        }
-
-        // check if counter maker is the same as the instruction maker
-        if self.accounts.maker.key().ne(&counter.maker) {
-            return Err(ProgramError::IncorrectAuthority);
         }
 
         match action {
