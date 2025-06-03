@@ -5,10 +5,7 @@ use pinocchio::{
     ProgramResult,
 };
 
-use crate::{
-    state::{AddressInfo, CreateAddressInfoAccounts, CreateAddressInfoInstructionData},
-    util::load_acc_mut_unchecked,
-};
+use crate::state::{AddressInfo, CreateAddressInfoAccounts, CreateAddressInfoInstructionData};
 
 pub struct Create<'info> {
     pub accounts: CreateAddressInfoAccounts<'info>,
@@ -45,10 +42,11 @@ impl<'info> Create<'info> {
 
         // write data to address info account
         let address_info_state = unsafe {
-            load_acc_mut_unchecked::<AddressInfo>(
+            bytemuck::try_from_bytes_mut::<AddressInfo>(
                 self.accounts.address_info.borrow_mut_data_unchecked(),
             )
-        }?;
+            .map_err(|_| ProgramError::InvalidAccountData)?
+        };
 
         address_info_state.set_inner(AddressInfo {
             name: self.instruction_datas.name,

@@ -18,11 +18,12 @@ pub struct AddressInfo {
 impl AddressInfo {
     pub const LEN: usize = core::mem::size_of::<AddressInfo>();
 
-    pub fn set_inner(&mut self, data: Self) {
+    pub fn set_inner(&mut self, data: Self) -> Self {
         self.name = data.name;
         self.house_number = data.house_number;
         self.street = data.street;
         self.city = data.city;
+        *self
     }
 }
 
