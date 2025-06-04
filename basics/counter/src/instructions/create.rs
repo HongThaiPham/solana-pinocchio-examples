@@ -1,6 +1,7 @@
 use bytemuck::{Pod, Zeroable};
 use pinocchio::{
     account_info::AccountInfo,
+    instruction::{Seed, Signer},
     program_error::ProgramError,
     pubkey,
     sysvars::{rent::Rent, Sysvar},
@@ -84,13 +85,17 @@ impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for Create<'info> {
 
 impl<'info> Create<'info> {
     pub fn handler(&mut self) -> ProgramResult {
-        let seeds = &[COUNTER_SEED, &[self.instruction_datas.bump as u8]];
+        let bump = self.instruction_datas.bump as u8;
+        let seeds = &[COUNTER_SEED, &[bump.clone()]];
         let counter_pubkey = pubkey::create_program_address(seeds, &crate::ID)
             .map_err(|_| ProgramError::InvalidSeeds)?;
 
         if self.accounts.counter.key() != &counter_pubkey {
             return Err(ProgramError::InvalidAccountData);
         }
+        let _bump = [bump];
+        let _seed = [Seed::from(COUNTER_SEED), Seed::from(&_bump)];
+        let signer_seeds = Signer::from(&_seed);
 
         // Initialize the counter account
         pinocchio_system::instructions::CreateAccount {
@@ -100,7 +105,7 @@ impl<'info> Create<'info> {
             lamports: Rent::get()?.minimum_balance(Counter::LEN),
             owner: &crate::ID,
         }
-        .invoke()?;
+        .invoke_signed(&[signer_seeds.clone()])?;
 
         // write the initial data to the counter account
         let counter = unsafe {

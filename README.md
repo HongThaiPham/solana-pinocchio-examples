@@ -211,6 +211,7 @@ Pinocchio is a lightweight library that allows you to write Solana programs with
 # Clone the repository
 git clone https://github.com/yourusername/solana-pinocchio-examples.git
 cd solana-pinocchio-examples
+bun i
 
 
 # Build the program
@@ -221,11 +222,18 @@ cargo-build-sbf
 # Run tests
 cargo test
 
+
 # Get program ID
 solana address -k target/deploy/example_program-keypair.json
 
 # Deploy
 solana program deploy target/deploy/example_program.so --program-id ./target/deploy/example_program-keypair.json
+
+# Test on devnet
+# Make sure you have update program ID in the codama node struct for generate client code
+bun gen:client:example_program
+bun test:client:example_program
+
 ```
 
 ## How to create a new Pinocchio program
@@ -233,10 +241,17 @@ solana program deploy target/deploy/example_program.so --program-id ./target/dep
 To create a new Pinocchio program you need install Rust and the Solana CLI tools. Then you can use the following steps:
 
 1. Create a new Rust library project:
+
    ```bash
-   cargo new --lib my_pinocchio_program
-   cd my_pinocchio_program
+   cargo new --lib my_pinocchio_program --edition 2021
    ```
+
+   cd my_pinocchio_program
+
+   ```
+
+   ```
+
 2. Install the Pinocchio crate:
    ```bash
    cargo add pinocchio
