@@ -1,5 +1,5 @@
-import { expect, test } from 'bun:test';
-import { getApi } from '@test/shared/lib';
+import { test } from 'bun:test';
+import { getApi } from '@clients/shared';
 import {
   addSignersToTransactionMessage,
   appendTransactionMessageInstruction,
@@ -11,10 +11,9 @@ import {
 } from '@solana/kit';
 import { getHelloInstruction } from '@clients/hello-solana';
 
-test('tokens:create-token', async () => {
+test('basics:hello-solana', async () => {
   const { defaultPayer, rpc, sendAndConfirmTransaction } = await getApi();
   let { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
-  console.log(defaultPayer.address);
 
   const transactionMintNftMessage = pipe(
     createTransactionMessage({

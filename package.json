@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "gen:client:hello-solana": "bun basics/hello-solana/generate-client.ts",
-    "test:client:hello-solana": "bun test --testFiles basics/hello-solana/tests/hello_solana.test.ts"
+    "test:client:hello-solana": "bun test --testFiles basics/hello-solana/tests/hello_solana.test.ts",
+    "gen:client:counter": "bun basics/counter/generate-client.ts",
+    "test:client:counter": "bun test --testFiles basics/counter/tests/counter.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"

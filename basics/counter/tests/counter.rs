@@ -51,7 +51,7 @@ mod tests {
                 &data,
                 vec![
                     AccountMeta::new(owner, true),
-                    AccountMeta::new(counter_pubkey, true),
+                    AccountMeta::new(counter_pubkey, false),
                     AccountMeta::new_readonly(system_program, false),
                 ],
             );
