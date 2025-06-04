@@ -1,0 +1,15 @@
+{
+  "name": "clients",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@solana/kit": "^2.1.1"
+  }
+}

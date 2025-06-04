@@ -1,0 +1,20 @@
+{
+  "name": "test-on-devnet",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test:tokens:create-token": "bun test --testFiles ./tokens/create-token.test.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@solana-program/memo": "^0.7.0",
+    "@solana/kit": "^2.1.1",
+    "dotenv": "^16.5.0"
+  }
+}

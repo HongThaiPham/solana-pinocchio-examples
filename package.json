@@ -1,0 +1,22 @@
+{
+  "name": "solana-pinocchio-examples",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "gen:client:hello-solana": "bun basics/hello-solana/generate-client.ts",
+    "test:client:hello-solana": "bun test --testFiles basics/hello-solana/tests/hello_solana.test.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@codama/renderers-js": "^1.2.14",
+    "@solana/kit": "^2.1.1",
+    "codama": "^1.3.0",
+    "dotenv": "^16.5.0"
+  }
+}
