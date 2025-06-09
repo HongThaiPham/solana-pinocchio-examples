@@ -1,24 +1,23 @@
-use core::{mem::MaybeUninit, slice::from_raw_parts};
-
 use bytemuck::{Pod, Zeroable};
 use pinocchio::{
     account_info::AccountInfo,
-    cpi::invoke,
-    instruction::{AccountMeta, Instruction},
     program_error::ProgramError,
+    pubkey::Pubkey,
+    sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };
+use pinocchio_token::state::Mint;
 pub struct CreateTokenIxsAccounts<'info> {
     pub payer: &'info AccountInfo,
     pub mint: &'info AccountInfo,
-    pub p_token_program: &'info AccountInfo,
+    pub token_program: &'info AccountInfo,
 }
 
 impl<'info> TryFrom<&'info [AccountInfo]> for CreateTokenIxsAccounts<'info> {
     type Error = ProgramError;
 
     fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
-        let [payer, mint, p_token_program, _] = accounts else {
+        let [payer, mint, token_program, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
 
@@ -35,15 +34,15 @@ impl<'info> TryFrom<&'info [AccountInfo]> for CreateTokenIxsAccounts<'info> {
             return Err(ProgramError::AccountAlreadyInitialized);
         }
 
-        // check p_token_program is a valid token program
-        if !p_token_program.executable() {
+        // check token_program is a valid token program
+        if !token_program.executable() {
             return Err(ProgramError::IncorrectProgramId);
         }
 
         Ok(Self {
             payer,
             mint,
-            p_token_program,
+            token_program: token_program,
         })
     }
 }
@@ -52,8 +51,8 @@ impl<'info> TryFrom<&'info [AccountInfo]> for CreateTokenIxsAccounts<'info> {
 #[derive(Clone, Copy, Pod, Zeroable)]
 pub struct CreateTokenInstructionData {
     pub token_decimals: u8,
-    pub mint_authority: [u8; 32],
-    pub freeze_authority: [u8; 32],
+    pub mint_authority: Pubkey,
+    pub freeze_authority: Pubkey,
 }
 
 impl CreateTokenInstructionData {
@@ -94,6 +93,15 @@ impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for CreateToken<'info> 
 
 impl<'info> CreateToken<'info> {
     pub fn handler(&mut self) -> ProgramResult {
+        pinocchio_system::instructions::CreateAccount {
+            from: self.accounts.payer,
+            to: self.accounts.mint,
+            space: Mint::LEN as u64,
+            lamports: Rent::get()?.minimum_balance(Mint::LEN),
+            owner: &self.accounts.token_program.key(),
+        }
+        .invoke()?;
+
         pinocchio_token::instructions::InitializeMint2 {
             mint: self.accounts.mint,
             decimals: self.instruction_datas.token_decimals,

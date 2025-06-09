@@ -11,7 +11,9 @@
     "gen:client:account-data": "bun basics/account-data/generate-client.ts",
     "test:client:account-data": "bun test --testFiles basics/account-data/tests/account-data.test.ts",
     "gen:client:favorites": "bun basics/favorites/generate-client.ts",
-    "test:client:favorites": "bun test --testFiles basics/favorites/tests/favorites.test.ts"
+    "test:client:favorites": "bun test --testFiles basics/favorites/tests/favorites.test.ts",
+    "gen:client:create-token": "bun tokens/create-token/generate-client.ts",
+    "test:client:create-token": "bun test --testFiles tokens/create-token/tests/create-token.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
