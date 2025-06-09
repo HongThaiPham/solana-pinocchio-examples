@@ -41,7 +41,7 @@ impl<'info> TryFrom<&'info [AccountInfo]> for CreateAddressInfoAccounts<'info> {
         }
         // check address_info is writable
         if !address_info.is_signer() {
-            return Err(ProgramError::InvalidAccountData);
+            return Err(ProgramError::MissingRequiredSignature);
         }
         // check address_info is not already initialized
         if address_info.data_len() != 0 {

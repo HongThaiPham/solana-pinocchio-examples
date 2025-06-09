@@ -12,6 +12,11 @@ import {
   instructionArgumentNode,
   instructionAccountNode,
   publicKeyValueNode,
+  fixedSizeTypeNode,
+  sizePrefixTypeNode,
+  stringTypeNode,
+  arrayTypeNode,
+  fixedCountNode,
 } from 'codama';
 
 export const root = rootNode(
@@ -28,7 +33,22 @@ export const root = rootNode(
           ),
         ],
         data: structTypeNode([
-          structFieldTypeNode({ name: 'name', type: numberTypeNode('u64') }),
+          structFieldTypeNode({
+            name: 'name',
+            type: fixedSizeTypeNode(stringTypeNode('utf8'), 50),
+          }),
+          structFieldTypeNode({
+            name: 'houseNumber',
+            type: numberTypeNode('u8'),
+          }),
+          structFieldTypeNode({
+            name: 'street',
+            type: fixedSizeTypeNode(stringTypeNode('utf8'), 50),
+          }),
+          structFieldTypeNode({
+            name: 'city',
+            type: fixedSizeTypeNode(stringTypeNode('utf8'), 50),
+          }),
         ]),
       }),
     ],
@@ -48,12 +68,20 @@ export const root = rootNode(
             defaultValueStrategy: 'omitted',
           }),
           instructionArgumentNode({
-            name: 'initialValue',
-            type: numberTypeNode('u64'),
+            name: 'name',
+            type: fixedSizeTypeNode(stringTypeNode('utf8'), 50),
           }),
           instructionArgumentNode({
-            name: 'bump',
+            name: 'houseNumber',
             type: numberTypeNode('u8'),
+          }),
+          instructionArgumentNode({
+            name: 'street',
+            type: fixedSizeTypeNode(stringTypeNode('utf8'), 50),
+          }),
+          instructionArgumentNode({
+            name: 'city',
+            type: fixedSizeTypeNode(stringTypeNode('utf8'), 50),
           }),
         ],
         accounts: [
@@ -64,90 +92,10 @@ export const root = rootNode(
             docs: ['The owner of the counter account.'],
           }),
           instructionAccountNode({
-            name: 'counter',
-            isSigner: false,
-            isWritable: true,
-            docs: ['The counter account to be created.'],
-          }),
-          instructionAccountNode({
-            name: 'systemProgram',
-            defaultValue: publicKeyValueNode(
-              '11111111111111111111111111111111',
-              'systemProgram'
-            ),
-            isSigner: false,
-            isWritable: false,
-            docs: ['System Program used to open our new class account'],
-          }),
-        ],
-      }),
-      instructionNode({
-        name: 'increase',
-        discriminators: [
-          constantDiscriminatorNode(
-            constantValueNode(numberTypeNode('u8'), numberValueNode(1))
-          ),
-        ],
-        arguments: [
-          instructionArgumentNode({
-            name: 'discriminator',
-            type: numberTypeNode('u8'),
-            defaultValue: numberValueNode(1),
-            defaultValueStrategy: 'omitted',
-          }),
-        ],
-        accounts: [
-          instructionAccountNode({
-            name: 'owner',
+            name: 'addressInfo',
             isSigner: true,
             isWritable: true,
-            docs: ['The owner of the counter account.'],
-          }),
-          instructionAccountNode({
-            name: 'counter',
-            isSigner: false,
-            isWritable: true,
-            docs: ['The counter account to be created.'],
-          }),
-          instructionAccountNode({
-            name: 'systemProgram',
-            defaultValue: publicKeyValueNode(
-              '11111111111111111111111111111111',
-              'systemProgram'
-            ),
-            isSigner: false,
-            isWritable: false,
-            docs: ['System Program used to open our new class account'],
-          }),
-        ],
-      }),
-      instructionNode({
-        name: 'decrease',
-        discriminators: [
-          constantDiscriminatorNode(
-            constantValueNode(numberTypeNode('u8'), numberValueNode(1))
-          ),
-        ],
-        arguments: [
-          instructionArgumentNode({
-            name: 'discriminator',
-            type: numberTypeNode('u8'),
-            defaultValue: numberValueNode(2),
-            defaultValueStrategy: 'omitted',
-          }),
-        ],
-        accounts: [
-          instructionAccountNode({
-            name: 'owner',
-            isSigner: true,
-            isWritable: true,
-            docs: ['The owner of the counter account.'],
-          }),
-          instructionAccountNode({
-            name: 'counter',
-            isSigner: false,
-            isWritable: true,
-            docs: ['The counter account to be created.'],
+            docs: ['The address info account to create'],
           }),
           instructionAccountNode({
             name: 'systemProgram',

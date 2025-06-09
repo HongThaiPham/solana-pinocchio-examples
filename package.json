@@ -7,7 +7,9 @@
     "gen:client:hello-solana": "bun basics/hello-solana/generate-client.ts",
     "test:client:hello-solana": "bun test --testFiles basics/hello-solana/tests/hello_solana.test.ts",
     "gen:client:counter": "bun basics/counter/generate-client.ts",
-    "test:client:counter": "bun test --testFiles basics/counter/tests/counter.test.ts"
+    "test:client:counter": "bun test --testFiles basics/counter/tests/counter.test.ts",
+    "gen:client:account-data": "bun basics/account-data/generate-client.ts",
+    "test:client:account-data": "bun test --testFiles basics/account-data/tests/account-data.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
