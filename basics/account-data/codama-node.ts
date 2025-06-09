@@ -13,10 +13,7 @@ import {
   instructionAccountNode,
   publicKeyValueNode,
   fixedSizeTypeNode,
-  sizePrefixTypeNode,
   stringTypeNode,
-  arrayTypeNode,
-  fixedCountNode,
 } from 'codama';
 
 export const root = rootNode(

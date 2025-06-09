@@ -1,6 +1,7 @@
 use bytemuck::{Pod, Zeroable};
 use pinocchio::{
     account_info::AccountInfo,
+    instruction::{Seed, Signer},
     program_error::ProgramError,
     pubkey,
     sysvars::{rent::Rent, Sysvar},
@@ -86,19 +87,29 @@ impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for CreatePda<'info> {
 
 impl<'info> CreatePda<'info> {
     pub fn handler(&mut self) -> ProgramResult {
-        let seeds = &[
-            FAVORITES_SEED,
-            self.accounts.user.key().as_ref(),
-            &[self.instruction_datas.bump as u8],
-        ];
-        let favorites_pubkey = pubkey::create_program_address(seeds, &crate::ID)
-            .map_err(|_| ProgramError::InvalidSeeds)?;
+        let favorites_pubkey = pubkey::create_program_address(
+            &[
+                FAVORITES_SEED,
+                self.accounts.user.key().as_ref(),
+                &[self.instruction_datas.bump as u8],
+            ],
+            &crate::ID,
+        )
+        .map_err(|_| ProgramError::InvalidSeeds)?;
 
         if self.accounts.favorites.key() != &favorites_pubkey {
             return Err(ProgramError::InvalidAccountData);
         }
 
-        // Initialize the counter account
+        let bump = [self.instruction_datas.bump as u8];
+        let seed = [
+            Seed::from(FAVORITES_SEED),
+            Seed::from(self.accounts.user.key().as_ref()),
+            Seed::from(&bump),
+        ];
+        let signer_seeds = Signer::from(&seed);
+
+        // Initialize the favorites account
         pinocchio_system::instructions::CreateAccount {
             from: self.accounts.user,
             to: self.accounts.favorites,
@@ -106,9 +117,9 @@ impl<'info> CreatePda<'info> {
             lamports: Rent::get()?.minimum_balance(Favorites::LEN),
             owner: &crate::ID,
         }
-        .invoke()?;
+        .invoke_signed(&[signer_seeds])?;
 
-        // write the initial data to the counter account
+        // // write the initial data to the counter account
         let favorites = unsafe {
             bytemuck::try_from_bytes_mut::<Favorites>(
                 self.accounts.favorites.borrow_mut_data_unchecked(),

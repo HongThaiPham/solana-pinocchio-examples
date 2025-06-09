@@ -12,7 +12,7 @@ impl<'info> TryFrom<&'info [AccountInfo]> for GetPdaIxsAccounts<'info> {
     type Error = ProgramError;
 
     fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
-        let [user, favorites, _] = accounts else {
+        let [user, favorites] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
 

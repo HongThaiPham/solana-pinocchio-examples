@@ -65,7 +65,7 @@ mod tests {
                 &data,
                 vec![
                     AccountMeta::new(user, true),
-                    AccountMeta::new(favorites_pubkey, true),
+                    AccountMeta::new(favorites_pubkey, false),
                     AccountMeta::new_readonly(system_program, false),
                 ],
             );
@@ -104,7 +104,7 @@ mod tests {
     fn test_get_pda() {
         let mollusk = Mollusk::new(&PROGRAM_ID, "../../target/deploy/favorites");
 
-        let (system_program, system_account) =
+        let (system_program, _system_account) =
             mollusk_svm::program::keyed_account_for_system_program();
 
         let user = Pubkey::new_from_array([0x02; 32]);
@@ -144,7 +144,6 @@ mod tests {
                 vec![
                     AccountMeta::new(user, true),
                     AccountMeta::new(favorites_pubkey, true),
-                    AccountMeta::new_readonly(system_program, false),
                 ],
             );
 
@@ -154,7 +153,6 @@ mod tests {
                     &[
                         (user, user_account.into()),
                         (favorites_pubkey, favorites_account.into()),
-                        (system_program, system_account),
                     ],
                     &[
                         Check::success(),
