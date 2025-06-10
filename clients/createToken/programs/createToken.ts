@@ -15,7 +15,7 @@ import {
 import { type ParsedCreateTokenInstruction } from '../instructions';
 
 export const CREATE_TOKEN_PROGRAM_ADDRESS =
-  'Es5r1Qu1cAFFDFVKh7Usvd2gjQbhoQ58Yo1rkX8PaUr1' as Address<'Es5r1Qu1cAFFDFVKh7Usvd2gjQbhoQ58Yo1rkX8PaUr1'>;
+  '7QP9vxNo7EEwTjrskup6n3F1dcwgUsVKgMFnJsXoyBde' as Address<'7QP9vxNo7EEwTjrskup6n3F1dcwgUsVKgMFnJsXoyBde'>;
 
 export enum CreateTokenInstruction {
   CreateToken,
@@ -34,7 +34,7 @@ export function identifyCreateTokenInstruction(
 }
 
 export type ParsedCreateTokenInstruction<
-  TProgram extends string = 'Es5r1Qu1cAFFDFVKh7Usvd2gjQbhoQ58Yo1rkX8PaUr1',
+  TProgram extends string = '7QP9vxNo7EEwTjrskup6n3F1dcwgUsVKgMFnJsXoyBde',
 > = {
   instructionType: CreateTokenInstruction.CreateToken;
 } & ParsedCreateTokenInstruction<TProgram>;

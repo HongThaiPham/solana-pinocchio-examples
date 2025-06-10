@@ -6,21 +6,16 @@ import {
   constantValueNode,
   numberTypeNode,
   numberValueNode,
-  accountNode,
-  structTypeNode,
-  structFieldTypeNode,
   instructionArgumentNode,
   instructionAccountNode,
   publicKeyValueNode,
-  fixedSizeTypeNode,
-  stringTypeNode,
   publicKeyTypeNode,
 } from 'codama';
 
 export const root = rootNode(
   programNode({
     name: 'create-token',
-    publicKey: 'Es5r1Qu1cAFFDFVKh7Usvd2gjQbhoQ58Yo1rkX8PaUr1',
+    publicKey: '7QP9vxNo7EEwTjrskup6n3F1dcwgUsVKgMFnJsXoyBde',
     version: '1.0.0',
     instructions: [
       instructionNode({
