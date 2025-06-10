@@ -1,4 +1,5 @@
 import {
+  address,
   createKeyPairSignerFromBytes,
   createSolanaRpc,
   createSolanaRpcSubscriptions,
@@ -40,3 +41,7 @@ export const getApi = async () => {
 
 export const explorerUrl = (tx: string) =>
   `https://explorer.solana.com/tx/${tx}?cluster=devnet`;
+
+export const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS = address(
+  'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
+);

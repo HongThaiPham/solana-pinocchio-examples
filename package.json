@@ -13,7 +13,9 @@
     "gen:client:favorites": "bun basics/favorites/generate-client.ts",
     "test:client:favorites": "bun test --testFiles basics/favorites/tests/favorites.test.ts",
     "gen:client:create-token": "bun tokens/create-token/generate-client.ts",
-    "test:client:create-token": "bun test --testFiles tokens/create-token/tests/create-token.test.ts"
+    "test:client:create-token": "bun test --testFiles tokens/create-token/tests/create-token.test.ts",
+    "gen:client:spl-token-minter": "bun tokens/spl-token-minter/generate-client.ts",
+    "test:client:spl-token-minter": "bun test --testFiles tokens/spl-token-minter/tests/spl-token-minter.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -24,6 +26,7 @@
   "dependencies": {
     "@codama/renderers-js": "^1.2.14",
     "@solana-program/system": "^0.7.0",
+    "@solana-program/token": "^0.5.1",
     "@solana/kit": "^2.1.1",
     "codama": "^1.3.0",
     "dotenv": "^16.5.0"

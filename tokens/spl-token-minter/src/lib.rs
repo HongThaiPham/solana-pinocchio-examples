@@ -6,7 +6,7 @@ use processor::process_instruction;
 pub mod instructions;
 pub mod processor;
 
-pinocchio_pubkey::declare_id!("7QP9vxNo7EEwTjrskup6n3F1dcwgUsVKgMFnJsXoyBde");
+pinocchio_pubkey::declare_id!("4HhKzZwZVL3hjSWYaqPGHXFDkgzSwcJeH2z6aaqYtWiv");
 
 program_entrypoint!(process_instruction);
 no_allocator!();
