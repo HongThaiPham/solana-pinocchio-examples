@@ -1,17 +1,17 @@
 [package]
-name = "counter"
+name = "cross-program-invocation"
 version = "0.1.0"
 edition = "2021"
 license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
 
-[lib]
-crate-type = ["lib", "cdylib"]
-
 [features]
 no-entrypoint = []
 cpi = ["no-entrypoint"]
+
+[lib]
+crate-type = ["lib", "cdylib"]
 
 [dependencies]
 pinocchio = { workspace = true }
@@ -20,6 +20,7 @@ pinocchio-pubkey = { workspace = true }
 pinocchio-system = { workspace = true }
 pinocchio-helper = { path = "../../pinocchio-helper" }
 bytemuck = { workspace = true }
+counter = { path = "../counter", features = ["cpi"] }
 
 
 [dev-dependencies]
