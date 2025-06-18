@@ -15,7 +15,9 @@
     "gen:client:create-token": "bun tokens/create-token/generate-client.ts",
     "test:client:create-token": "bun test --testFiles tokens/create-token/tests/create-token.test.ts",
     "gen:client:spl-token-minter": "bun tokens/spl-token-minter/generate-client.ts",
-    "test:client:spl-token-minter": "bun test --testFiles tokens/spl-token-minter/tests/spl-token-minter.test.ts"
+    "test:client:spl-token-minter": "bun test --testFiles tokens/spl-token-minter/tests/spl-token-minter.test.ts",
+    "gen:client:transfer-tokens": "bun tokens/transfer-tokens/generate-client.ts",
+    "test:client:transfer-tokens": "bun test --testFiles tokens/transfer-tokens/tests/transfer-tokens.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
