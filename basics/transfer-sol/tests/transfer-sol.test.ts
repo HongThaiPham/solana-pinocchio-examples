@@ -1,35 +1,68 @@
 import { getApi } from '@/clients/shared';
 import {
-  getMintTokenInstruction,
-  getCreateTokenInstruction,
-} from '@/clients/splTokenMinter';
+  getTransferSolWithCpiInstruction,
+  getTransferSolWithProgramInstruction,
+  TRANSFER_SOL_PROGRAM_ADDRESS,
+} from '@/clients/transferSol';
+import { getCreateAccountInstruction } from '@solana-program/system';
 import {
   addSignersToTransactionMessage,
   appendTransactionMessageInstruction,
+  appendTransactionMessageInstructions,
   createTransactionMessage,
   generateKeyPairSigner,
-  getAddressEncoder,
   pipe,
   setTransactionMessageFeePayer,
   setTransactionMessageLifetimeUsingBlockhash,
   signTransactionMessageWithSigners,
 } from '@solana/kit';
 import { test, beforeAll, expect } from 'bun:test';
-
-import {
-  TOKEN_PROGRAM_ADDRESS,
-  findAssociatedTokenPda,
-} from '@solana-program/token';
-
-let mintKeypair: Awaited<ReturnType<typeof generateKeyPairSigner>>;
-beforeAll(async () => {
-  mintKeypair = await generateKeyPairSigner();
-});
-
-test('tokens:spl-token-minter:createToken', async () => {
-  const addressEncoder = getAddressEncoder();
+test('basics:transfer-sol:transfer-sol-with-program', async () => {
   const { defaultPayer, rpc, sendAndConfirmTransaction } = await getApi();
   let { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+  const payerSinger = await generateKeyPairSigner();
+  const recipientSinger = await generateKeyPairSigner();
+
+  const transaction = pipe(
+    createTransactionMessage({
+      version: 0,
+    }),
+    (tx) => setTransactionMessageFeePayer(defaultPayer.address, tx),
+    (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+    (tx) =>
+      appendTransactionMessageInstructions(
+        [
+          getCreateAccountInstruction({
+            newAccount: payerSinger,
+            payer: defaultPayer,
+            space: 0,
+            lamports: 1000000, // 0.001 SOL
+            programAddress: TRANSFER_SOL_PROGRAM_ADDRESS,
+          }),
+          getTransferSolWithProgramInstruction({
+            payer: payerSinger,
+            recipient: recipientSinger.address,
+            amount: 1000000, // 0.001 SOL
+          }),
+        ],
+        tx
+      ),
+    (tx) => addSignersToTransactionMessage([defaultPayer, payerSinger], tx)
+  );
+  const signedTransaction =
+    await signTransactionMessageWithSigners(transaction);
+
+  await sendAndConfirmTransaction(signedTransaction, {
+    commitment: 'confirmed',
+  });
+});
+
+test('basics:transfer-sol:transfer-sol-with-cpi', async () => {
+  const { defaultPayer, rpc, sendAndConfirmTransaction } = await getApi();
+  let { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+
+  const recipientSinger = await generateKeyPairSigner();
 
   const transaction = pipe(
     createTransactionMessage({
@@ -39,69 +72,19 @@ test('tokens:spl-token-minter:createToken', async () => {
     (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
     (tx) =>
       appendTransactionMessageInstruction(
-        getCreateTokenInstruction({
+        getTransferSolWithCpiInstruction({
           payer: defaultPayer,
-          tokenDecimals: 9,
-          mint: mintKeypair,
-          mintAuthority: defaultPayer.address,
-          freezeAuthority: defaultPayer.address,
+          recipient: recipientSinger.address,
+          amount: 10000000, // 0.0001 SOL
         }),
         tx
       ),
     (tx) => addSignersToTransactionMessage([defaultPayer], tx)
   );
-
   const signedTransaction =
     await signTransactionMessageWithSigners(transaction);
 
   await sendAndConfirmTransaction(signedTransaction, {
     commitment: 'confirmed',
   });
-});
-
-test('tokens:spl-token-minter:mintToken', async () => {
-  const addressEncoder = getAddressEncoder();
-  const { defaultPayer, rpc, sendAndConfirmTransaction } = await getApi();
-  let { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
-
-  const receiverAddress = await generateKeyPairSigner();
-
-  const [tokenAccount] = await findAssociatedTokenPda({
-    mint: mintKeypair.address,
-    owner: receiverAddress.address,
-    tokenProgram: TOKEN_PROGRAM_ADDRESS,
-  });
-
-  const transaction = pipe(
-    createTransactionMessage({
-      version: 0,
-    }),
-    (tx) => setTransactionMessageFeePayer(defaultPayer.address, tx),
-    (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
-    (tx) =>
-      appendTransactionMessageInstruction(
-        getMintTokenInstruction({
-          amount: 100 * 10 ** 9, // 100 tokens with 9 decimals
-          mint: mintKeypair.address,
-          mintAuthority: defaultPayer,
-          to: receiverAddress.address,
-          tokenAccount,
-        }),
-        tx
-      ),
-    (tx) => addSignersToTransactionMessage([defaultPayer], tx)
-  );
-
-  const signedTransaction =
-    await signTransactionMessageWithSigners(transaction);
-
-  await sendAndConfirmTransaction(signedTransaction, {
-    commitment: 'confirmed',
-  });
-
-  const tokenAccountBalance = await rpc
-    .getTokenAccountBalance(tokenAccount)
-    .send();
-
-  expect(tokenAccountBalance.value.uiAmountString.toString()).toBe('100');
 });

@@ -17,7 +17,9 @@
     "gen:client:spl-token-minter": "bun tokens/spl-token-minter/generate-client.ts",
     "test:client:spl-token-minter": "bun test --testFiles tokens/spl-token-minter/tests/spl-token-minter.test.ts",
     "gen:client:transfer-tokens": "bun tokens/transfer-tokens/generate-client.ts",
-    "test:client:transfer-tokens": "bun test --testFiles tokens/transfer-tokens/tests/transfer-tokens.test.ts"
+    "test:client:transfer-tokens": "bun test --testFiles tokens/transfer-tokens/tests/transfer-tokens.test.ts",
+    "gen:client:transfer-sol": "bun basics/transfer-sol/generate-client.ts",
+    "test:client:transfer-sol": "bun test --testFiles basics/transfer-sol/tests/transfer-sol.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"

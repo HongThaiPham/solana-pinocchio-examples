@@ -221,7 +221,11 @@ cargo-build-sbf
 
 # Run tests
 cargo test
+# or
+cargo test -p example_program
 
+
+# Test on devnet
 
 # Get program ID
 solana address -k target/deploy/example_program-keypair.json
@@ -229,7 +233,6 @@ solana address -k target/deploy/example_program-keypair.json
 # Deploy
 solana program deploy target/deploy/example_program.so --program-id ./target/deploy/example_program-keypair.json
 
-# Test on devnet
 # Make sure you have update program ID in the codama node struct for generate client code
 bun gen:client:example_program
 bun test:client:example_program
