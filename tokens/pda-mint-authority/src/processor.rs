@@ -4,7 +4,7 @@ use pinocchio::{
 
 use pinocchio_log::log;
 
-use crate::instructions::{create_token, init, Instruction};
+use crate::instructions::{create_token, init, mint_token, Instruction};
 
 #[inline(always)]
 pub fn process_instruction(
@@ -29,6 +29,10 @@ pub fn process_instruction(
         Instruction::InitMintAuthority => {
             log!("Instruction::InitMintAuthority");
             init::InitMintAuthority::try_from((accounts, data))?.handler()
+        }
+        Instruction::MintToken => {
+            log!("Instruction::MintToken");
+            mint_token::MintToken::try_from((accounts, data))?.handler()
         }
     }
 }

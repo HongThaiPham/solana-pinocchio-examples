@@ -2,7 +2,9 @@ use core::mem::transmute;
 
 use pinocchio::{
     account_info::AccountInfo,
+    instruction::{Seed, Signer},
     program_error::ProgramError,
+    pubkey::find_program_address,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };
@@ -29,6 +31,13 @@ impl<'info> TryFrom<&'info [AccountInfo]> for InitMintAuthorityAccounts<'info> {
 
         if !mint_authority.data_is_empty() {
             return Err(ProgramError::AccountAlreadyInitialized);
+        }
+
+        let (mint_authority_key, _) =
+            find_program_address(&[MintAuthority::SEED_PREFIX], &crate::ID);
+
+        if mint_authority_key.ne(mint_authority.key()) {
+            return Err(ProgramError::InvalidAccountData);
         }
 
         Ok(Self {
@@ -84,6 +93,13 @@ impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for InitMintAuthority<'
 
 impl<'info> InitMintAuthority<'info> {
     pub fn handler(&mut self) -> ProgramResult {
+        let bump_binding = [self.instruction_datas.bump];
+        let seed = [
+            Seed::from(MintAuthority::SEED_PREFIX),
+            Seed::from(&bump_binding),
+        ];
+        let signer_seeds = Signer::from(&seed);
+
         pinocchio_system::instructions::CreateAccount {
             from: self.accounts.payer,
             to: self.accounts.mint_authority,
@@ -91,7 +107,7 @@ impl<'info> InitMintAuthority<'info> {
             lamports: Rent::get()?.minimum_balance(MintAuthority::LEN),
             owner: &crate::ID,
         }
-        .invoke()?;
+        .invoke_signed(&[signer_seeds])?;
 
         let mut data = self.accounts.mint_authority.try_borrow_mut_data()?;
         let mint_authority = MintAuthority::load_mut(data.as_mut())?;

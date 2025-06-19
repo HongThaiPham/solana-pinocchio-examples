@@ -3,14 +3,17 @@ use core::mem::transmute;
 use pinocchio::{
     account_info::AccountInfo,
     program_error::ProgramError,
-    pubkey::Pubkey,
+    pubkey::{find_program_address, Pubkey},
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };
 use pinocchio_token::state::Mint;
+
+use crate::state::MintAuthority;
 pub struct CreateTokenIxsAccounts<'info> {
     pub payer: &'info AccountInfo,
     pub mint: &'info AccountInfo,
+    pub mint_authority: &'info AccountInfo,
     pub token_program: &'info AccountInfo,
 }
 
@@ -18,7 +21,7 @@ impl<'info> TryFrom<&'info [AccountInfo]> for CreateTokenIxsAccounts<'info> {
     type Error = ProgramError;
 
     fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
-        let [payer, mint, token_program, _] = accounts else {
+        let [payer, mint, mint_authority, token_program, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
 
@@ -40,10 +43,25 @@ impl<'info> TryFrom<&'info [AccountInfo]> for CreateTokenIxsAccounts<'info> {
             return Err(ProgramError::IncorrectProgramId);
         }
 
+        if mint_authority.data_is_empty() {
+            return Err(ProgramError::UninitializedAccount);
+        }
+        if !mint_authority.is_owned_by(&crate::ID) {
+            return Err(ProgramError::InvalidAccountOwner);
+        }
+
+        let (mint_authority_key, _) =
+            find_program_address(&[MintAuthority::SEED_PREFIX], &crate::ID);
+
+        if mint_authority_key.ne(mint_authority.key()) {
+            return Err(ProgramError::InvalidAccountData);
+        }
+
         Ok(Self {
             payer,
             mint,
-            token_program: token_program,
+            mint_authority,
+            token_program,
         })
     }
 }
