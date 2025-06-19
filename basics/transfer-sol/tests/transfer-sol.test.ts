@@ -16,7 +16,7 @@ import {
   setTransactionMessageLifetimeUsingBlockhash,
   signTransactionMessageWithSigners,
 } from '@solana/kit';
-import { test, beforeAll, expect } from 'bun:test';
+import { test, expect } from 'bun:test';
 test('basics:transfer-sol:transfer-sol-with-program', async () => {
   const { defaultPayer, rpc, sendAndConfirmTransaction } = await getApi();
   let { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
@@ -56,6 +56,9 @@ test('basics:transfer-sol:transfer-sol-with-program', async () => {
   await sendAndConfirmTransaction(signedTransaction, {
     commitment: 'confirmed',
   });
+
+  const recipientBalance = await rpc.getBalance(recipientSinger.address).send();
+  expect(recipientBalance.value.valueOf()).toBe(1000000n); // 0.001
 });
 
 test('basics:transfer-sol:transfer-sol-with-cpi', async () => {
@@ -87,4 +90,7 @@ test('basics:transfer-sol:transfer-sol-with-cpi', async () => {
   await sendAndConfirmTransaction(signedTransaction, {
     commitment: 'confirmed',
   });
+
+  const recipientBalance = await rpc.getBalance(recipientSinger.address).send();
+  expect(recipientBalance.value.valueOf()).toBe(10000000n); //
 });

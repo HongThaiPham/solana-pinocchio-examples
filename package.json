@@ -19,7 +19,9 @@
     "gen:client:transfer-tokens": "bun tokens/transfer-tokens/generate-client.ts",
     "test:client:transfer-tokens": "bun test --testFiles tokens/transfer-tokens/tests/transfer-tokens.test.ts",
     "gen:client:transfer-sol": "bun basics/transfer-sol/generate-client.ts",
-    "test:client:transfer-sol": "bun test --testFiles basics/transfer-sol/tests/transfer-sol.test.ts"
+    "test:client:transfer-sol": "bun test --testFiles basics/transfer-sol/tests/transfer-sol.test.ts",
+    "gen:client:close-account": "bun basics/close-account/generate-client.ts",
+    "test:client:close-account": "bun test --testFiles basics/close-account/tests/close-account.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
