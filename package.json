@@ -25,7 +25,9 @@
     "gen:client:cross-program-invocation": "bun basics/cross-program-invocation/generate-client.ts",
     "test:client:cross-program-invocation": "bun test --testFiles basics/cross-program-invocation/tests/cross-program-invocation.test.ts",
     "gen:client:pda-mint-authority": "bun tokens/pda-mint-authority/generate-client.ts",
-    "test:client:pda-mint-authority": "bun test --testFiles tokens/pda-mint-authority/tests/pda-mint-authority.test.ts"
+    "test:client:pda-mint-authority": "bun test --testFiles tokens/pda-mint-authority/tests/pda-mint-authority.test.ts",
+    "gen:client:token-2022-basic": "bun tokens/token-2022-basic/generate-client.ts",
+    "test:client:token-2022-basic": "bun test --testFiles tokens/token-2022-basic/tests/token-2022-basic.test.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -37,6 +39,7 @@
     "@codama/renderers-js": "^1.2.14",
     "@solana-program/system": "^0.7.0",
     "@solana-program/token": "^0.5.1",
+    "@solana-program/token-2022": "^0.4.2",
     "@solana/kit": "^2.1.1",
     "codama": "^1.3.0",
     "dotenv": "^16.5.0"
