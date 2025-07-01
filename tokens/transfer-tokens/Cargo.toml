@@ -25,3 +25,4 @@ mollusk-svm = { workspace = true }
 solana-sdk = { workspace = true }
 spl-token = "8.0.0"
 spl-associated-token-account = "7.0.0"
+solana-program-runtime = { workspace = true }

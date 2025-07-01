@@ -15,7 +15,6 @@ pinocchio-log = { workspace = true }
 pinocchio-pubkey = { workspace = true }
 pinocchio-system = { workspace = true }
 pinocchio-helper = { path = "../../pinocchio-helper" }
-bytemuck = { workspace = true }
 pinocchio-token = { workspace = true }
 pinocchio-associated-token-account = { workspace = true }
 
@@ -23,3 +22,6 @@ pinocchio-associated-token-account = { workspace = true }
 [dev-dependencies]
 mollusk-svm = { workspace = true }
 solana-sdk = { workspace = true }
+spl-token = "8.0.0"
+spl-associated-token-account = "7.0.0"
+solana-program-runtime = { workspace = true }

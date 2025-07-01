@@ -21,3 +21,4 @@ bytemuck = { workspace = true }
 [dev-dependencies]
 mollusk-svm = { workspace = true }
 solana-sdk = { workspace = true }
+solana-program-runtime = { workspace = true }

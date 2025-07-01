@@ -1,4 +1,5 @@
-use bytemuck::{Pod, Zeroable};
+use core::mem::transmute;
+
 use pinocchio::{
     account_info::AccountInfo,
     program_error::ProgramError,
@@ -48,7 +49,7 @@ impl<'info> TryFrom<&'info [AccountInfo]> for CreateTokenIxsAccounts<'info> {
 }
 
 #[repr(C)]
-#[derive(Clone, Copy, Pod, Zeroable)]
+#[derive(Clone, Copy)]
 pub struct CreateTokenInstructionData {
     pub token_decimals: u8,
     pub mint_authority: Pubkey,
@@ -63,10 +64,12 @@ impl<'info> TryFrom<&'info [u8]> for CreateTokenInstructionData {
     type Error = ProgramError;
 
     fn try_from(data: &'info [u8]) -> Result<Self, Self::Error> {
-        let result = bytemuck::try_from_bytes::<Self>(&data)
-            .map_err(|_| ProgramError::InvalidInstructionData)?;
-
-        Ok(*result)
+        Ok(unsafe {
+            transmute(
+                TryInto::<[u8; size_of::<CreateTokenInstructionData>()]>::try_into(data)
+                    .map_err(|_| ProgramError::InvalidInstructionData)?,
+            )
+        })
     }
 }
 

@@ -26,3 +26,4 @@ counter = { path = "../counter", features = ["cpi"] }
 [dev-dependencies]
 mollusk-svm = { workspace = true }
 solana-sdk = { workspace = true }
+solana-program-runtime = { workspace = true }

@@ -1,4 +1,5 @@
-use bytemuck::{Pod, Zeroable};
+use core::mem::transmute;
+
 use pinocchio::{account_info::AccountInfo, program_error::ProgramError, ProgramResult};
 use pinocchio_token::state::{Mint, TokenAccount};
 pub struct MintTokenIxsAccounts<'info> {
@@ -86,7 +87,7 @@ impl<'info> TryFrom<&'info [AccountInfo]> for MintTokenIxsAccounts<'info> {
 }
 
 #[repr(C)]
-#[derive(Clone, Copy, Pod, Zeroable)]
+#[derive(Clone, Copy)]
 pub struct MintTokenInstructionData {
     pub amount: [u8; 8],
 }
@@ -99,10 +100,12 @@ impl<'info> TryFrom<&'info [u8]> for MintTokenInstructionData {
     type Error = ProgramError;
 
     fn try_from(data: &'info [u8]) -> Result<Self, Self::Error> {
-        let result = bytemuck::try_from_bytes::<Self>(&data)
-            .map_err(|_| ProgramError::InvalidInstructionData)?;
-
-        Ok(*result)
+        Ok(unsafe {
+            transmute(
+                TryInto::<[u8; size_of::<MintTokenInstructionData>()]>::try_into(data)
+                    .map_err(|_| ProgramError::InvalidInstructionData)?,
+            )
+        })
     }
 }
 
