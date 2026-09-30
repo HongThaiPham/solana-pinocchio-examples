@@ -51,11 +51,10 @@ impl<'info> TryFrom<&'info mut [AccountView]> for GetPda<'info> {
 
 impl<'info> GetPda<'info> {
     pub fn handler(&mut self) -> ProgramResult {
+        let mut favorites_data = self.accounts.favorites.try_borrow_mut()?;
         let favorites = unsafe {
-            bytemuck::try_from_bytes_mut::<Favorites>(
-                self.accounts.favorites.try_borrow_mut()(),
-            )
-            .map_err(|_| ProgramError::InvalidAccountData)?
+            bytemuck::try_from_bytes_mut::<Favorites>(favorites_data.as_mut())
+                .map_err(|_| ProgramError::InvalidAccountData)?
         };
 
         let seeds = &[FAVORITES_SEED, self.accounts.user.address().as_ref()];

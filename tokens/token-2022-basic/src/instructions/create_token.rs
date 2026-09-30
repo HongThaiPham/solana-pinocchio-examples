@@ -1,10 +1,11 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    cpi::invoke,
+    AccountView,
+    Address,
     error::ProgramError,
     sysvars::{rent::Rent, Sysvar},
-    AccountView, Address, ProgramResult,
+    ProgramResult,
 };
 use spl_token_2022::state::PackedSizeOf;
 pub struct CreateTokenIxsAccounts<'info> {
@@ -103,30 +104,13 @@ impl<'info> CreateToken<'info> {
         }
         .invoke()?;
 
-        let account_metas: [AccountMeta; 1] = [AccountMeta::writable(self.accounts.mint.address())];
-
-        // Instruction data layout:
-        // -  [0]: instruction discriminator (1 byte, u8)
-        // -  [1]: decimals (1 byte, u8)
-        // -  [2..34]: mint_authority (32 bytes, Pubkey)
-        // -  [34]: freeze_authority presence flag (1 byte, u8)
-        // -  [35..67]: freeze_authority (optional, 32 bytes, Pubkey)
-
-        let mut instruction_data = [0; 67];
-        instruction_data[0] = 20; // Instruction discriminator for InitializeMint2
-        instruction_data[1] = self.instruction_datas.token_decimals;
-        instruction_data[2..34].copy_from_slice(self.accounts.payer.address().as_ref());
-        instruction_data[34] = 1; // Freeze authority presence flag (1 byte, u8)
-
-        instruction_data[35..67].copy_from_slice(self.accounts.payer.address().as_ref());
-
-        let instruction = pinocchio::instruction::Instruction {
-            program_id: self.accounts.token_program.address(),
-            accounts: &account_metas,
-            data: &instruction_data,
-        };
-
-        invoke(&instruction, &[self.accounts.mint])?;
+        pinocchio_token::instructions::InitializeMint2::new(
+            self.accounts.mint,
+            self.instruction_datas.token_decimals,
+            self.accounts.payer.address(),
+            Some(self.accounts.payer.address()),
+        )
+        .invoke_with_program(self.accounts.token_program.address())?;
 
         Ok(())
     }

@@ -119,12 +119,11 @@ impl<'info> CreatePda<'info> {
         }
         .invoke_signed(&[signer_seeds])?;
 
-        // // write the initial data to the counter account
+        // write the initial data to the favorites account
+        let mut favorites_data = self.accounts.favorites.try_borrow_mut()?;
         let favorites = unsafe {
-            bytemuck::try_from_bytes_mut::<Favorites>(
-                self.accounts.favorites.try_borrow_mut()(),
-            )
-            .map_err(|_| ProgramError::InvalidAccountData)?
+            bytemuck::try_from_bytes_mut::<Favorites>(favorites_data.as_mut())
+                .map_err(|_| ProgramError::InvalidAccountData)?
         };
 
         favorites.set_inner(Favorites {

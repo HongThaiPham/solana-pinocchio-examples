@@ -1,4 +1,4 @@
-use pinocchio::{error::ProgramError, AccountView, ProgramResult};
+use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
 use crate::{
     constants::COUNTER_SEED,
@@ -71,11 +71,10 @@ impl<'info> TryFrom<&'info mut [AccountView]> for Mutate<'info> {
 
 impl<'info> Mutate<'info> {
     pub fn handler(&mut self, action: MutationType) -> ProgramResult {
+        let mut counter_data = self.accounts.counter.try_borrow_mut()?;
         let counter = unsafe {
-            bytemuck::try_from_bytes_mut::<Counter>(
-                self.accounts.counter.try_borrow_mut()(),
-            )
-            .map_err(|_| ProgramError::InvalidAccountData)?
+            bytemuck::try_from_bytes_mut::<Counter>(counter_data.as_mut())
+                .map_err(|_| ProgramError::InvalidAccountData)?
         };
 
         let seeds = &[COUNTER_SEED];
@@ -96,7 +95,7 @@ impl<'info> Mutate<'info> {
     fn increment(&mut self, counter: &mut Counter) -> ProgramResult {
         let mutated_state = u64::from_le_bytes(counter.count)
             .checked_add(1)
-            .ok_or(CounterError::Overflow)?; // Overflow error
+            .ok_or(ProgramError::from(CounterError::Overflow))?;
 
         counter.count = mutated_state.to_le_bytes();
         Ok(())
@@ -104,7 +103,7 @@ impl<'info> Mutate<'info> {
     fn decrement(&mut self, counter: &mut Counter) -> ProgramResult {
         let mutated_state = u64::from_le_bytes(counter.count)
             .checked_sub(1)
-            .ok_or(CounterError::Overflow)?; // Overflow error
+            .ok_or(ProgramError::from(CounterError::Overflow))?;
 
         counter.count = mutated_state.to_le_bytes();
         Ok(())

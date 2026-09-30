@@ -102,12 +102,12 @@ impl<'info> CreateToken<'info> {
         }
         .invoke()?;
 
-        pinocchio_token::instructions::InitializeMint2 {
-            mint: self.accounts.mint,
-            decimals: self.instruction_datas.token_decimals,
-            mint_authority: &self.instruction_datas.mint_authority,
-            freeze_authority: Option::Some(&self.instruction_datas.freeze_authority),
-        }
+        pinocchio_token::instructions::InitializeMint2::new(
+            self.accounts.mint,
+            self.instruction_datas.token_decimals,
+            &self.instruction_datas.mint_authority,
+            Some(&self.instruction_datas.freeze_authority),
+        )
         .invoke()?;
         Ok(())
     }

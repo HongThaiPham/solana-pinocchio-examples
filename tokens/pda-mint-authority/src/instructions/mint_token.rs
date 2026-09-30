@@ -178,12 +178,12 @@ impl<'info> MintToken<'info> {
         ];
         let signer_seeds = Signer::from(&seed);
 
-        pinocchio_token::instructions::MintTo {
-            mint: &self.accounts.mint,
-            account: &self.accounts.token_account,
-            amount: u64::from_le_bytes(self.instruction_datas.amount),
-            mint_authority: &self.accounts.mint_authority,
-        }
+        pinocchio_token::instructions::MintTo::new(
+            &self.accounts.mint,
+            &self.accounts.token_account,
+            &self.accounts.mint_authority,
+            u64::from_le_bytes(self.instruction_datas.amount),
+        )
         .invoke_signed(&[signer_seeds])?;
         Ok(())
     }

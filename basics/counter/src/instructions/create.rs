@@ -1,9 +1,9 @@
 use bytemuck::{Pod, Zeroable};
 use pinocchio::{
     AccountView,
-    instruction::{Seed, Signer},
+    Address,
     error::ProgramError,
-    pubkey,
+    instruction::{Seed, Signer},
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };
@@ -109,11 +109,10 @@ impl<'info> Create<'info> {
         .invoke_signed(&[signer_seeds])?;
 
         // write the initial data to the counter account
+        let mut counter_data = self.accounts.counter.try_borrow_mut()?;
         let counter = unsafe {
-            bytemuck::try_from_bytes_mut::<Counter>(
-                self.accounts.counter.try_borrow_mut()(),
-            )
-            .map_err(|_| ProgramError::InvalidAccountData)?
+            bytemuck::try_from_bytes_mut::<Counter>(counter_data.as_mut())
+                .map_err(|_| ProgramError::InvalidAccountData)?
         };
 
         counter.set_inner(Counter {
