@@ -1,10 +1,10 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountInfo,
+    account_info::AccountView,
     instruction::{Seed, Signer},
-    program_error::ProgramError,
-    pubkey::find_program_address,
+    pinocchio::error::ProgramError,
+    Address::find_program_address,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };
@@ -13,20 +13,20 @@ use pinocchio_token::state::Mint;
 use crate::state::Offer;
 
 pub struct MakeOfferAccounts<'info> {
-    pub maker: &'info AccountInfo,
-    pub token_mint_a: &'info AccountInfo,
-    pub token_mint_b: &'info AccountInfo,
-    pub maker_ata_a: &'info AccountInfo,
-    pub offer: &'info AccountInfo,
-    pub vault: &'info AccountInfo,
-    pub token_program: &'info AccountInfo,
-    pub system_program: &'info AccountInfo,
+    pub maker: &'info AccountView,
+    pub token_mint_a: &'info AccountView,
+    pub token_mint_b: &'info AccountView,
+    pub maker_ata_a: &'info AccountView,
+    pub offer: &'info AccountView,
+    pub vault: &'info AccountView,
+    pub token_program: &'info AccountView,
+    pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for MakeOfferAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for MakeOfferAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [maker, token_mint_a, token_mint_b, maker_ata_a, offer, vault, token_program, system_program, _] =
             accounts
         else {
@@ -135,11 +135,11 @@ pub struct MakeOffer<'info> {
     pub instruction_datas: MakeOfferInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for MakeOffer<'info> {
+impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for MakeOffer<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountInfo], &'info [u8]),
+        (accounts, data): (&'info [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = MakeOfferAccounts::try_from(accounts)?;
         let instruction_datas = MakeOfferInstructionData::try_from(data)?;

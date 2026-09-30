@@ -1,19 +1,19 @@
 use pinocchio::{
-    account_info::AccountInfo, program_error::ProgramError, pubkey::find_program_address,
+    account_info::AccountView, pinocchio::error::ProgramError, Address::find_program_address,
     ProgramResult,
 };
 
 use crate::state::User;
 
 pub struct CloseUserAccounts<'info> {
-    pub payer: &'info AccountInfo,
-    pub target_account: &'info AccountInfo,
+    pub payer: &'info AccountView,
+    pub target_account: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for CloseUserAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for CloseUserAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [payer, target_account, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -46,10 +46,10 @@ pub struct CloseUser<'info> {
     pub accounts: CloseUserAccounts<'info>,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for CloseUser<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for CloseUser<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let accounts = CloseUserAccounts::try_from(accounts)?;
 
         Ok(Self { accounts })
@@ -74,8 +74,8 @@ impl<'info> CloseUser<'info> {
 
     fn close_program_account(
         &self,
-        account: &AccountInfo,
-        destination: &AccountInfo,
+        account: &AccountView,
+        destination: &AccountView,
     ) -> ProgramResult {
         {
             let mut data = account.try_borrow_mut_data()?;

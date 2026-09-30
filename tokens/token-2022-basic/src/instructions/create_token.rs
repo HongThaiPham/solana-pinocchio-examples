@@ -1,24 +1,22 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountInfo,
     cpi::invoke,
-    instruction::AccountMeta,
-    program_error::ProgramError,
+    error::ProgramError,
     sysvars::{rent::Rent, Sysvar},
-    ProgramResult,
+    AccountView, Address, ProgramResult,
 };
 use spl_token_2022::state::PackedSizeOf;
 pub struct CreateTokenIxsAccounts<'info> {
-    pub payer: &'info AccountInfo,
-    pub mint: &'info AccountInfo,
-    pub token_program: &'info AccountInfo,
+    pub payer: &'info AccountView,
+    pub mint: &'info AccountView,
+    pub token_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for CreateTokenIxsAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for CreateTokenIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [payer, mint, token_program, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -78,11 +76,11 @@ pub struct CreateToken<'info> {
     pub instruction_datas: CreateTokenInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for CreateToken<'info> {
+impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for CreateToken<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountInfo], &'info [u8]),
+        (accounts, data): (&'info [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = CreateTokenIxsAccounts::try_from(accounts)?;
         let instruction_datas = CreateTokenInstructionData::try_from(data)?;

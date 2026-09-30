@@ -5,7 +5,7 @@ mod tests {
         result::{Check, ProgramResult},
         Mollusk,
     };
-    use solana_sdk::{instruction::Instruction, pubkey::Pubkey};
+    use solana_sdk::{instruction::Instruction, Address};
     pub const PROGRAM_ID: Pubkey = Pubkey::new_from_array(ID);
 
     #[test]

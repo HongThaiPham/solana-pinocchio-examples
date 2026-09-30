@@ -1,4 +1,4 @@
-use pinocchio::{account_info::AccountInfo, program_error::ProgramError, pubkey, ProgramResult};
+use pinocchio::{error::ProgramError, AccountView, ProgramResult};
 
 use crate::{
     constants::COUNTER_SEED,
@@ -26,14 +26,14 @@ impl<'info> TryFrom<&'info [u8]> for MutateCounterInstructionData {
 }
 
 pub struct MutateCounterIxsAccounts<'info> {
-    pub maker: &'info AccountInfo,
-    pub counter: &'info AccountInfo,
+    pub maker: &'info AccountView,
+    pub counter: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for MutateCounterIxsAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for MutateCounterIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [maker, counter, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -59,10 +59,10 @@ pub struct Mutate<'info> {
     pub accounts: MutateCounterIxsAccounts<'info>,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for Mutate<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for Mutate<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let accounts = MutateCounterIxsAccounts::try_from(accounts)?;
 
         Ok(Self { accounts })
@@ -79,7 +79,7 @@ impl<'info> Mutate<'info> {
         };
 
         let seeds = &[COUNTER_SEED];
-        let (counter_pubkey, _) = pubkey::find_program_address(seeds, &crate::ID);
+        let (counter_pubkey, _) = Address::find_program_address(seeds, &crate::ID);
 
         if self.accounts.counter.key().ne(&counter_pubkey) {
             return Err(ProgramError::InvalidAccountData);

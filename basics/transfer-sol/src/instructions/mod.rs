@@ -1,7 +1,7 @@
 pub mod shared;
 pub mod transfer_sol_with_cpi;
 pub mod transfer_sol_with_program;
-use pinocchio::program_error::ProgramError;
+use pinocchio::error::ProgramError;
 
 #[repr(u8)]
 pub enum Instruction {

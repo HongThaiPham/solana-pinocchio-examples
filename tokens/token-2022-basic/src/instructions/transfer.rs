@@ -1,26 +1,26 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountInfo, cpi::invoke, instruction::AccountMeta, program_error::ProgramError,
+    account_info::AccountView, cpi::invoke, instruction::AccountMeta, pinocchio::error::ProgramError,
     ProgramResult,
 };
 use spl_token_2022::extension::StateWithExtensions;
 pub struct TransferIxsAccounts<'info> {
-    pub from: &'info AccountInfo,
-    pub mint: &'info AccountInfo,
-    pub to: &'info AccountInfo,
+    pub from: &'info AccountView,
+    pub mint: &'info AccountView,
+    pub to: &'info AccountView,
     // token_account is the associated token account for the mint of to account
-    pub from_token_account: &'info AccountInfo,
-    pub to_token_account: &'info AccountInfo,
-    pub associated_token_program: &'info AccountInfo,
-    pub token_program: &'info AccountInfo,
-    pub system_program: &'info AccountInfo,
+    pub from_token_account: &'info AccountView,
+    pub to_token_account: &'info AccountView,
+    pub associated_token_program: &'info AccountView,
+    pub token_program: &'info AccountView,
+    pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for TransferIxsAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for TransferIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [from, mint, to, from_token_account, to_token_account, associated_token_program, token_program, system_program] =
             accounts
         else {
@@ -106,11 +106,11 @@ pub struct Transfer<'info> {
     pub instruction_datas: TransferInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for Transfer<'info> {
+impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for Transfer<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountInfo], &'info [u8]),
+        (accounts, data): (&'info [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = TransferIxsAccounts::try_from(accounts)?;
         let instruction_datas = TransferInstructionData::try_from(data)?;

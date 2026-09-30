@@ -1,21 +1,21 @@
 use bytemuck::{Pod, Zeroable};
 use pinocchio::{
-    account_info::AccountInfo, cpi::invoke, instruction::AccountMeta, program_error::ProgramError,
+    account_info::AccountView, cpi::invoke, instruction::AccountMeta, pinocchio::error::ProgramError,
     ProgramResult,
 };
 use pinocchio_log::log;
 
 pub struct CreateCounterIxsAccounts<'info> {
-    pub maker: &'info AccountInfo,
-    pub counter: &'info AccountInfo,
-    pub counter_program: &'info AccountInfo,
-    pub system_program: &'info AccountInfo,
+    pub maker: &'info AccountView,
+    pub counter: &'info AccountView,
+    pub counter_program: &'info AccountView,
+    pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for CreateCounterIxsAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for CreateCounterIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [maker, counter, counter_program, system_program] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -56,11 +56,11 @@ pub struct Create<'info> {
     pub instruction_datas: CreateCounterInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for Create<'info> {
+impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for Create<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountInfo], &'info [u8]),
+        (accounts, data): (&'info [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = CreateCounterIxsAccounts::try_from(accounts)?;
         let instruction_datas = CreateCounterInstructionData::try_from(data)?;

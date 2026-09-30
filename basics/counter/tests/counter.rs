@@ -12,7 +12,7 @@ mod tests {
         account::AccountSharedData,
         instruction::{AccountMeta, Instruction},
         native_token::LAMPORTS_PER_SOL,
-        pubkey::Pubkey,
+        Address,
     };
 
     pub const PROGRAM_ID: Pubkey = Pubkey::new_from_array(ID);
@@ -28,7 +28,7 @@ mod tests {
         let owner_account = AccountSharedData::new(1 * LAMPORTS_PER_SOL, 0, &system_program);
 
         let (counter_pubkey, bump) =
-            solana_sdk::pubkey::Pubkey::find_program_address(&[COUNTER_SEED], &PROGRAM_ID);
+            solana_sdk::Address::find_program_address(&[COUNTER_SEED], &PROGRAM_ID);
         let counter_account = AccountSharedData::new(0, 0, &system_program);
 
         let counter_init_state = Counter {
@@ -94,7 +94,7 @@ mod tests {
         let owner_account = AccountSharedData::new(1 * LAMPORTS_PER_SOL, 0, &system_program);
 
         let (counter_pubkey, _) =
-            solana_sdk::pubkey::Pubkey::find_program_address(&[COUNTER_SEED], &PROGRAM_ID);
+            solana_sdk::Address::find_program_address(&[COUNTER_SEED], &PROGRAM_ID);
 
         let counter_init_state = Counter {
             count: 100u64.to_le_bytes(),
@@ -161,7 +161,7 @@ mod tests {
         let owner_account = AccountSharedData::new(1 * LAMPORTS_PER_SOL, 0, &system_program);
 
         let (counter_pubkey, _) =
-            solana_sdk::pubkey::Pubkey::find_program_address(&[COUNTER_SEED], &PROGRAM_ID);
+            solana_sdk::Address::find_program_address(&[COUNTER_SEED], &PROGRAM_ID);
 
         let counter_init_state = Counter {
             count: 100u64.to_le_bytes(),

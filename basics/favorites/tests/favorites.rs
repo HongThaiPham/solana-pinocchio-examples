@@ -14,7 +14,7 @@ mod tests {
         account::AccountSharedData,
         instruction::{AccountMeta, Instruction},
         native_token::LAMPORTS_PER_SOL,
-        pubkey::Pubkey,
+        Address,
     };
 
     pub const PROGRAM_ID: Pubkey = Pubkey::new_from_array(ID);
@@ -29,7 +29,7 @@ mod tests {
         let user = Pubkey::new_from_array([0x02; 32]);
         let user_account = AccountSharedData::new(1 * LAMPORTS_PER_SOL, 0, &system_program);
 
-        let (favorites_pubkey, bump) = solana_sdk::pubkey::Pubkey::find_program_address(
+        let (favorites_pubkey, bump) = solana_sdk::Address::find_program_address(
             &[FAVORITES_SEED, user.as_ref()],
             &PROGRAM_ID,
         );
@@ -110,7 +110,7 @@ mod tests {
         let user = Pubkey::new_from_array([0x02; 32]);
         let user_account = AccountSharedData::new(1 * LAMPORTS_PER_SOL, 0, &system_program);
 
-        let (favorites_pubkey, bump) = solana_sdk::pubkey::Pubkey::find_program_address(
+        let (favorites_pubkey, bump) = solana_sdk::Address::find_program_address(
             &[FAVORITES_SEED, user.as_ref()],
             &PROGRAM_ID,
         );

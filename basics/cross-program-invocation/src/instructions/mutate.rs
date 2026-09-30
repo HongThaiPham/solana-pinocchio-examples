@@ -1,6 +1,6 @@
 use counter::state::MutationType;
 use pinocchio::{
-    account_info::AccountInfo, cpi::invoke, instruction::AccountMeta, program_error::ProgramError,
+    account_info::AccountView, cpi::invoke, instruction::AccountMeta, pinocchio::error::ProgramError,
     ProgramResult,
 };
 
@@ -24,16 +24,16 @@ impl<'info> TryFrom<&'info [u8]> for MutateCounterInstructionData {
 }
 
 pub struct MutateCounterIxsAccounts<'info> {
-    pub maker: &'info AccountInfo,
-    pub counter: &'info AccountInfo,
-    pub counter_program: &'info AccountInfo,
-    pub system_program: &'info AccountInfo,
+    pub maker: &'info AccountView,
+    pub counter: &'info AccountView,
+    pub counter_program: &'info AccountView,
+    pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for MutateCounterIxsAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for MutateCounterIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [maker, counter, counter_program, system_program] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -51,10 +51,10 @@ pub struct Mutate<'info> {
     pub accounts: MutateCounterIxsAccounts<'info>,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for Mutate<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for Mutate<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let accounts = MutateCounterIxsAccounts::try_from(accounts)?;
 
         Ok(Self { accounts })

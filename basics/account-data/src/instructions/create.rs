@@ -1,6 +1,6 @@
 use pinocchio::{
-    account_info::AccountInfo,
-    program_error::ProgramError,
+    account_info::AccountView,
+    pinocchio::error::ProgramError,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };
@@ -12,11 +12,11 @@ pub struct Create<'info> {
     pub instruction_datas: CreateAddressInfoInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for Create<'info> {
+impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for Create<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountInfo], &'info [u8]),
+        (accounts, data): (&'info [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = CreateAddressInfoAccounts::try_from(accounts)?;
         let instruction_datas = CreateAddressInfoInstructionData::try_from(data)?;

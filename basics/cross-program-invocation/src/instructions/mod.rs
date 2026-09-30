@@ -5,7 +5,7 @@ pub use create::*;
 pub mod mutate;
 pub use mutate::*;
 
-use pinocchio::program_error::ProgramError;
+use pinocchio::error::ProgramError;
 
 #[repr(u8)]
 pub enum Instruction {

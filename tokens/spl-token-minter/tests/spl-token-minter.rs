@@ -19,7 +19,7 @@ mod tests {
         ID,
     };
 
-    use solana_sdk::pubkey::Pubkey;
+    use solana_sdk::Address;
 
     pub const PROGRAM_ID: Pubkey = Pubkey::new_from_array(ID);
 

@@ -1,8 +1,8 @@
 use bytemuck::{Pod, Zeroable};
 use pinocchio::{
-    account_info::AccountInfo,
+    account_info::AccountView,
     instruction::{Seed, Signer},
-    program_error::ProgramError,
+    pinocchio::error::ProgramError,
     pubkey,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
@@ -11,14 +11,14 @@ use pinocchio::{
 use crate::{constants::COUNTER_SEED, state::Counter};
 
 pub struct CreateCounterIxsAccounts<'info> {
-    pub maker: &'info AccountInfo,
-    pub counter: &'info AccountInfo,
+    pub maker: &'info AccountView,
+    pub counter: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for CreateCounterIxsAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for CreateCounterIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [maker, counter, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -67,11 +67,11 @@ pub struct Create<'info> {
     pub instruction_datas: CreateCounterInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for Create<'info> {
+impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for Create<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountInfo], &'info [u8]),
+        (accounts, data): (&'info [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = CreateCounterIxsAccounts::try_from(accounts)?;
         let instruction_datas = CreateCounterInstructionData::try_from(data)?;
@@ -85,7 +85,7 @@ impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for Create<'info> {
 
 impl<'info> Create<'info> {
     pub fn handler(&mut self) -> ProgramResult {
-        let counter_pubkey = pubkey::create_program_address(
+        let counter_pubkey = Address::create_program_address(
             &[COUNTER_SEED, &[self.instruction_datas.bump as u8]],
             &crate::ID,
         )

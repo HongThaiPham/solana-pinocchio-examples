@@ -1,17 +1,17 @@
-use pinocchio::{account_info::AccountInfo, program_error::ProgramError, pubkey, ProgramResult};
+use pinocchio::{error::ProgramError, AccountView, ProgramResult};
 use pinocchio_log::log;
 
 use crate::{constants::FAVORITES_SEED, state::Favorites};
 
 pub struct GetPdaIxsAccounts<'info> {
-    pub user: &'info AccountInfo,
-    pub favorites: &'info AccountInfo,
+    pub user: &'info AccountView,
+    pub favorites: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for GetPdaIxsAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for GetPdaIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [user, favorites] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -39,10 +39,10 @@ pub struct GetPda<'info> {
     pub accounts: GetPdaIxsAccounts<'info>,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for GetPda<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for GetPda<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let accounts = GetPdaIxsAccounts::try_from(accounts)?;
 
         Ok(Self { accounts })
@@ -59,7 +59,7 @@ impl<'info> GetPda<'info> {
         };
 
         let seeds = &[FAVORITES_SEED, self.accounts.user.key().as_ref()];
-        let (favorites_pubkey, _) = pubkey::find_program_address(seeds, &crate::ID);
+        let (favorites_pubkey, _) = Address::find_program_address(seeds, &crate::ID);
 
         if self.accounts.favorites.key().ne(&favorites_pubkey) {
             return Err(ProgramError::InvalidAccountData);

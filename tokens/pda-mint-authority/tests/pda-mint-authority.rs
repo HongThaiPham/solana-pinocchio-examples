@@ -21,7 +21,7 @@ mod tests {
         program_pack::Pack,
     };
 
-    use solana_sdk::pubkey::Pubkey;
+    use solana_sdk::Address;
     use spl_associated_token_account::get_associated_token_address;
 
     pub const PROGRAM_ID: Pubkey = Pubkey::new_from_array(ID);
@@ -48,7 +48,7 @@ mod tests {
         let payer = Pubkey::new_from_array([0x02; 32]);
         let payer_account = AccountSharedData::new(1 * LAMPORTS_PER_SOL, 0, &system_program);
 
-        let (mint_authority_pubkey, bump) = solana_sdk::pubkey::Pubkey::find_program_address(
+        let (mint_authority_pubkey, bump) = solana_sdk::Address::find_program_address(
             &[MintAuthority::SEED_PREFIX],
             &PROGRAM_ID,
         );
@@ -112,7 +112,7 @@ mod tests {
         let payer = Pubkey::new_from_array([0x02; 32]);
         let payer_account = AccountSharedData::new(1 * LAMPORTS_PER_SOL, 0, &system_program);
 
-        let (mint_authority_pubkey, bump) = solana_sdk::pubkey::Pubkey::find_program_address(
+        let (mint_authority_pubkey, bump) = solana_sdk::Address::find_program_address(
             &[MintAuthority::SEED_PREFIX],
             &PROGRAM_ID,
         );
@@ -210,7 +210,7 @@ mod tests {
         let payer = Pubkey::new_from_array([0x02; 32]);
         let payer_account = AccountSharedData::new(1 * LAMPORTS_PER_SOL, 0, &system_program);
 
-        let (mint_authority_pubkey, bump) = solana_sdk::pubkey::Pubkey::find_program_address(
+        let (mint_authority_pubkey, bump) = solana_sdk::Address::find_program_address(
             &[MintAuthority::SEED_PREFIX],
             &PROGRAM_ID,
         );

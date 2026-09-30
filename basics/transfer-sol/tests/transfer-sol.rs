@@ -11,7 +11,7 @@ mod tests {
         account::AccountSharedData,
         instruction::{AccountMeta, Instruction},
         native_token::LAMPORTS_PER_SOL,
-        pubkey::Pubkey,
+        Address,
     };
 
     pub const PROGRAM_ID: Pubkey = Pubkey::new_from_array(ID);

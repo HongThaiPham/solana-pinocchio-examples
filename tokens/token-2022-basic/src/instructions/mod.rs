@@ -3,7 +3,7 @@ pub use create_token::*;
 pub mod mint_token;
 pub use mint_token::*;
 pub mod transfer;
-use pinocchio::program_error::ProgramError;
+use pinocchio::error::ProgramError;
 pub use transfer::*;
 
 #[repr(u8)]

@@ -1,10 +1,10 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountInfo,
+    account_info::AccountView,
     instruction::{Seed, Signer},
-    program_error::ProgramError,
-    pubkey::find_program_address,
+    pinocchio::error::ProgramError,
+    Address::find_program_address,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };
@@ -12,14 +12,14 @@ use pinocchio::{
 use crate::state::User;
 
 pub struct CreateUserAccounts<'info> {
-    pub payer: &'info AccountInfo,
-    pub target_account: &'info AccountInfo,
+    pub payer: &'info AccountView,
+    pub target_account: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for CreateUserAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for CreateUserAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [payer, target_account, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -71,11 +71,11 @@ pub struct CreateUser<'info> {
     pub instruction_datas: CreateUserInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for CreateUser<'info> {
+impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for CreateUser<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountInfo], &'info [u8]),
+        (accounts, data): (&'info [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = CreateUserAccounts::try_from(accounts)?;
         let instruction_datas = CreateUserInstructionData::try_from(data)?;

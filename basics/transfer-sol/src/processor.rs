@@ -1,5 +1,5 @@
 use pinocchio::{
-    account_info::AccountInfo, program_error::ProgramError, pubkey::Pubkey, ProgramResult,
+    account_info::AccountView, pinocchio::error::ProgramError, Address, ProgramResult,
 };
 
 use pinocchio_log::log;
@@ -11,8 +11,8 @@ use crate::instructions::{
 
 #[inline(always)]
 pub fn process_instruction(
-    program_id: &Pubkey,
-    accounts: &[AccountInfo],
+    program_id: &Address,
+    accounts: &[AccountView],
     instruction_data: &[u8],
 ) -> ProgramResult {
     // Validate program ID

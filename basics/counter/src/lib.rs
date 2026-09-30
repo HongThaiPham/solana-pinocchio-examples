@@ -15,7 +15,7 @@ pub mod instructions;
 pub mod processor;
 pub mod state;
 
-pinocchio_pubkey::declare_id!("Ag8tR8rXHLwUGPCfgGUJYjcYnFnqFdJ8XfjGP5LeRpg6");
+pinocchio_Address::declare_id!("Ag8tR8rXHLwUGPCfgGUJYjcYnFnqFdJ8XfjGP5LeRpg6");
 
 #[cfg(not(feature = "no-entrypoint"))]
 program_entrypoint!(process_instruction);

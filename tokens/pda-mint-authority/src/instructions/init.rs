@@ -1,10 +1,10 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountInfo,
+    account_info::AccountView,
     instruction::{Seed, Signer},
-    program_error::ProgramError,
-    pubkey::find_program_address,
+    pinocchio::error::ProgramError,
+    Address::find_program_address,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };
@@ -12,14 +12,14 @@ use pinocchio::{
 use crate::state::MintAuthority;
 
 pub struct InitMintAuthorityAccounts<'info> {
-    pub payer: &'info AccountInfo,
-    pub mint_authority: &'info AccountInfo,
+    pub payer: &'info AccountView,
+    pub mint_authority: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for InitMintAuthorityAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for InitMintAuthorityAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [payer, mint_authority, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -75,11 +75,11 @@ pub struct InitMintAuthority<'info> {
     pub instruction_datas: InitMintAuthorityInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for InitMintAuthority<'info> {
+impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for InitMintAuthority<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountInfo], &'info [u8]),
+        (accounts, data): (&'info [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = InitMintAuthorityAccounts::try_from(accounts)?;
         let instruction_datas = InitMintAuthorityInstructionData::try_from(data)?;

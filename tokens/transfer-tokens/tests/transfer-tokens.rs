@@ -24,7 +24,7 @@ mod tests {
     };
 
     use solana_sdk::pubkey;
-    use solana_sdk::pubkey::Pubkey;
+    use solana_sdk::Address;
 
     pub const PROGRAM_ID: Pubkey = Pubkey::new_from_array(ID);
     pub const TOKEN_PROGRAM_ID: Pubkey = pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");

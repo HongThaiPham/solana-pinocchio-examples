@@ -1,6 +1,6 @@
 pub mod close_user;
 pub mod create_user;
-use pinocchio::program_error::ProgramError;
+use pinocchio::error::ProgramError;
 
 #[repr(u8)]
 pub enum Instruction {

@@ -1,4 +1,4 @@
-use pinocchio::{account_info::AccountInfo, program_error::ProgramError, ProgramResult};
+use pinocchio::{error::ProgramError, AccountView, ProgramResult};
 use pinocchio_system::instructions::Transfer;
 
 use crate::instructions::shared::{TransferSolAccounts, TransferSolInstructionData};
@@ -8,11 +8,11 @@ pub struct TransferSolWithCpi<'info> {
     pub instruction_datas: TransferSolInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for TransferSolWithCpi<'info> {
+impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for TransferSolWithCpi<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountInfo], &'info [u8]),
+        (accounts, data): (&'info [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = TransferSolAccounts::try_from(accounts)?;
         let instruction_datas = TransferSolInstructionData::try_from(data)?;

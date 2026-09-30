@@ -3,7 +3,7 @@ pub use create_pda::*;
 
 pub mod get_pda;
 pub use get_pda::*;
-use pinocchio::program_error::ProgramError;
+use pinocchio::error::ProgramError;
 
 #[repr(u8)]
 pub enum Instruction {

@@ -1,8 +1,8 @@
 use bytemuck::{Pod, Zeroable};
 use pinocchio::{
-    account_info::AccountInfo,
+    account_info::AccountView,
     instruction::{Seed, Signer},
-    program_error::ProgramError,
+    pinocchio::error::ProgramError,
     pubkey,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
@@ -11,14 +11,14 @@ use pinocchio::{
 use crate::{constants::FAVORITES_SEED, state::Favorites};
 
 pub struct CreatePdaIxsAccounts<'info> {
-    pub user: &'info AccountInfo,
-    pub favorites: &'info AccountInfo,
+    pub user: &'info AccountView,
+    pub favorites: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountInfo]> for CreatePdaIxsAccounts<'info> {
+impl<'info> TryFrom<&'info [AccountView]> for CreatePdaIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountInfo]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
         let [user, favorites, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -69,11 +69,11 @@ pub struct CreatePda<'info> {
     pub instruction_datas: CreatePdaInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for CreatePda<'info> {
+impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for CreatePda<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountInfo], &'info [u8]),
+        (accounts, data): (&'info [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = CreatePdaIxsAccounts::try_from(accounts)?;
         let instruction_datas = CreatePdaInstructionData::try_from(data)?;
@@ -87,7 +87,7 @@ impl<'info> TryFrom<(&'info [AccountInfo], &'info [u8])> for CreatePda<'info> {
 
 impl<'info> CreatePda<'info> {
     pub fn handler(&mut self) -> ProgramResult {
-        let favorites_pubkey = pubkey::create_program_address(
+        let favorites_pubkey = Address::create_program_address(
             &[
                 FAVORITES_SEED,
                 self.accounts.user.key().as_ref(),
