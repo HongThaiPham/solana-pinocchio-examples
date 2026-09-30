@@ -1,7 +1,5 @@
 use counter::state::MutationType;
-use pinocchio::{
-    account_info::AccountView, pinocchio::error::ProgramError, Address, ProgramResult,
-};
+use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
 use pinocchio_log::log;
 

@@ -2,7 +2,7 @@ use bytemuck::{Pod, Zeroable};
 use pinocchio::{
     account_info::AccountView,
     instruction::{Seed, Signer},
-    pinocchio::error::ProgramError,
+    error::ProgramError,
     pubkey,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,

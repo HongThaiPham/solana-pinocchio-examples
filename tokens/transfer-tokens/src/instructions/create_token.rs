@@ -1,7 +1,7 @@
 use bytemuck::{Pod, Zeroable};
 use pinocchio::{
     account_info::AccountView,
-    pinocchio::error::ProgramError,
+    error::ProgramError,
     Address,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,

@@ -1,6 +1,4 @@
-use pinocchio::{
-    account_info::AccountView, pinocchio::error::ProgramError, Address, ProgramResult,
-};
+use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
 use crate::instructions::{Instruction, MakeOffer, TakeOffer};
 use pinocchio_log::log;

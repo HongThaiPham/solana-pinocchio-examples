@@ -1,4 +1,4 @@
-use pinocchio::{pinocchio::error::ProgramError, Address};
+use pinocchio::{error::ProgramError, Address};
 
 #[repr(C)] //keeps the struct layout the same across different architectures
 #[derive(Clone, Copy)]

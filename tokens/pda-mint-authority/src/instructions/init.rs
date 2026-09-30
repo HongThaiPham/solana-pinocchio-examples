@@ -3,7 +3,7 @@ use core::mem::transmute;
 use pinocchio::{
     account_info::AccountView,
     instruction::{Seed, Signer},
-    pinocchio::error::ProgramError,
+    error::ProgramError,
     Address::find_program_address,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,

@@ -1,9 +1,9 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountView,
-    pinocchio::error::ProgramError,
-    Address::{find_program_address, Pubkey},
+    AccountView,
+    Address,
+    error::ProgramError,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };

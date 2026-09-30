@@ -1,7 +1,6 @@
 use counter::state::MutationType;
 use pinocchio::{
-    account_info::AccountView, cpi::invoke, instruction::AccountMeta, pinocchio::error::ProgramError,
-    ProgramResult,
+    cpi::invoke, error::ProgramError, instruction::AccountMeta, AccountView, ProgramResult,
 };
 
 pub struct MutateCounterInstructionData {

@@ -1,8 +1,7 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountView, cpi::invoke, instruction::AccountMeta, pinocchio::error::ProgramError,
-    ProgramResult,
+    cpi::invoke, error::ProgramError, instruction::AccountMeta, AccountView, ProgramResult,
 };
 use spl_token_2022::extension::StateWithExtensions;
 pub struct MintTokenIxsAccounts<'info> {

@@ -1,7 +1,7 @@
 use pinocchio::{
     account_info::AccountView,
     instruction::{Seed, Signer},
-    pinocchio::error::ProgramError,
+    error::ProgramError,
     Address::find_program_address,
     ProgramResult,
 };
