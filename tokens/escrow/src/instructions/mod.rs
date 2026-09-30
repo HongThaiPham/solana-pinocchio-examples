@@ -1,7 +1,7 @@
 pub mod make_offer;
 pub use make_offer::*;
 pub mod take_offer;
-use pinocchio::error::ProgramError;
+use error::ProgramError;
 pub use take_offer::*;
 
 #[repr(u8)]

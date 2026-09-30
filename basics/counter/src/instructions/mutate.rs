@@ -30,10 +30,10 @@ pub struct MutateCounterIxsAccounts<'info> {
     pub counter: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for MutateCounterIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for MutateCounterIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [maker, counter, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -47,7 +47,7 @@ impl<'info> TryFrom<&'info [AccountView]> for MutateCounterIxsAccounts<'info> {
             return Err(ProgramError::InvalidAccountData);
         }
         //check counter has the correct owner
-        if !counter.is_owned_by(&crate::ID) {
+        if !counter.owned_by(&crate::ID) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
@@ -59,10 +59,10 @@ pub struct Mutate<'info> {
     pub accounts: MutateCounterIxsAccounts<'info>,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for Mutate<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for Mutate<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let accounts = MutateCounterIxsAccounts::try_from(accounts)?;
 
         Ok(Self { accounts })
@@ -73,7 +73,7 @@ impl<'info> Mutate<'info> {
     pub fn handler(&mut self, action: MutationType) -> ProgramResult {
         let counter = unsafe {
             bytemuck::try_from_bytes_mut::<Counter>(
-                self.accounts.counter.borrow_mut_data_unchecked(),
+                self.accounts.counter.try_borrow_mut()(),
             )
             .map_err(|_| ProgramError::InvalidAccountData)?
         };
@@ -81,7 +81,7 @@ impl<'info> Mutate<'info> {
         let seeds = &[COUNTER_SEED];
         let (counter_pubkey, _) = Address::find_program_address(seeds, &crate::ID);
 
-        if self.accounts.counter.key().ne(&counter_pubkey) {
+        if self.accounts.counter.address().ne(&counter_pubkey) {
             return Err(ProgramError::InvalidAccountData);
         }
 

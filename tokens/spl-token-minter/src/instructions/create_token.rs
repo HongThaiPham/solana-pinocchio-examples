@@ -1,7 +1,7 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountView,
+    AccountView,
     error::ProgramError,
     Address,
     sysvars::{rent::Rent, Sysvar},
@@ -14,10 +14,10 @@ pub struct CreateTokenIxsAccounts<'info> {
     pub token_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for CreateTokenIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for CreateTokenIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [payer, mint, token_program, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -101,7 +101,7 @@ impl<'info> CreateToken<'info> {
             to: self.accounts.mint,
             space: Mint::LEN as u64,
             lamports: Rent::get()?.minimum_balance(Mint::LEN),
-            owner: &self.accounts.token_program.key(),
+            owner: self.accounts.token_program.address(),
         }
         .invoke()?;
 

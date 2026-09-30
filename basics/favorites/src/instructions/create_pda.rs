@@ -1,8 +1,8 @@
 use bytemuck::{Pod, Zeroable};
 use pinocchio::{
-    account_info::AccountView,
+    AccountView,
     instruction::{Seed, Signer},
-    pinocchio::error::ProgramError,
+    error::ProgramError,
     pubkey,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
@@ -15,10 +15,10 @@ pub struct CreatePdaIxsAccounts<'info> {
     pub favorites: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for CreatePdaIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for CreatePdaIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [user, favorites, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -90,21 +90,21 @@ impl<'info> CreatePda<'info> {
         let favorites_pubkey = Address::create_program_address(
             &[
                 FAVORITES_SEED,
-                self.accounts.user.key().as_ref(),
+                self.accounts.user.address().as_ref(),
                 &[self.instruction_datas.bump as u8],
             ],
             &crate::ID,
         )
         .map_err(|_| ProgramError::InvalidSeeds)?;
 
-        if self.accounts.favorites.key() != &favorites_pubkey {
+        if self.accounts.favorites.address() != &favorites_pubkey {
             return Err(ProgramError::InvalidAccountData);
         }
 
         let bump = [self.instruction_datas.bump as u8];
         let seed = [
             Seed::from(FAVORITES_SEED),
-            Seed::from(self.accounts.user.key().as_ref()),
+            Seed::from(self.accounts.user.address().as_ref()),
             Seed::from(&bump),
         ];
         let signer_seeds = Signer::from(&seed);
@@ -122,7 +122,7 @@ impl<'info> CreatePda<'info> {
         // // write the initial data to the counter account
         let favorites = unsafe {
             bytemuck::try_from_bytes_mut::<Favorites>(
-                self.accounts.favorites.borrow_mut_data_unchecked(),
+                self.accounts.favorites.try_borrow_mut()(),
             )
             .map_err(|_| ProgramError::InvalidAccountData)?
         };

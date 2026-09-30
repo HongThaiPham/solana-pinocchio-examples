@@ -2,7 +2,7 @@ pub mod create_token;
 pub use create_token::*;
 pub mod mint_token;
 pub use mint_token::*;
-use pinocchio::error::ProgramError;
+use error::ProgramError;
 
 #[repr(u8)]
 pub enum Instruction {

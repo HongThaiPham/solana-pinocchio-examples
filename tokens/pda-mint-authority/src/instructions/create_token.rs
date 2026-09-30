@@ -17,10 +17,10 @@ pub struct CreateTokenIxsAccounts<'info> {
     pub token_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for CreateTokenIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for CreateTokenIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [payer, mint, mint_authority, token_program, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -43,17 +43,17 @@ impl<'info> TryFrom<&'info [AccountView]> for CreateTokenIxsAccounts<'info> {
             return Err(ProgramError::IncorrectProgramId);
         }
 
-        if mint_authority.data_is_empty() {
+        if mint_authority.is_data_empty() {
             return Err(ProgramError::UninitializedAccount);
         }
-        if !mint_authority.is_owned_by(&crate::ID) {
+        if !mint_authority.owned_by(&crate::ID) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
         let (mint_authority_key, _) =
             find_program_address(&[MintAuthority::SEED_PREFIX], &crate::ID);
 
-        if mint_authority_key.ne(mint_authority.key()) {
+        if mint_authority_key.ne(mint_authority.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -119,7 +119,7 @@ impl<'info> CreateToken<'info> {
             to: self.accounts.mint,
             space: Mint::LEN as u64,
             lamports: Rent::get()?.minimum_balance(Mint::LEN),
-            owner: &self.accounts.token_program.key(),
+            owner: self.accounts.token_program.address(),
         }
         .invoke()?;
 

@@ -15,10 +15,10 @@ pub struct MintTokenIxsAccounts<'info> {
     pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for MintTokenIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for MintTokenIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [mint_authority, mint, to, token_account, associated_token_program, token_program, system_program] =
             accounts
         else {
@@ -35,7 +35,7 @@ impl<'info> TryFrom<&'info [AccountView]> for MintTokenIxsAccounts<'info> {
         }
 
         // check mint owner is token program
-        if !mint.is_owned_by(token_program.key()) {
+        if !mint.owned_by(token_program.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -55,7 +55,7 @@ impl<'info> TryFrom<&'info [AccountView]> for MintTokenIxsAccounts<'info> {
         }
 
         // //check system_program is a valid system program
-        if !system_program.key().eq(&pinocchio_system::ID) {
+        if !system_program.address().eq(&pinocchio_system::ID) {
             return Err(ProgramError::IncorrectProgramId);
         }
 
@@ -117,7 +117,7 @@ impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for MintToken<'info> {
 
 impl<'info> MintToken<'info> {
     pub fn handler(&mut self) -> ProgramResult {
-        if self.accounts.token_account.data_is_empty() {
+        if self.accounts.token_account.is_data_empty() {
             pinocchio_associated_token_account::instructions::Create {
                 account: &self.accounts.token_account,
                 mint: &self.accounts.mint,
@@ -130,9 +130,9 @@ impl<'info> MintToken<'info> {
         }
 
         let account_metas: [AccountMeta; 3] = [
-            AccountMeta::writable(self.accounts.mint.key()),
-            AccountMeta::writable(self.accounts.token_account.key()),
-            AccountMeta::readonly_signer(self.accounts.mint_authority.key()),
+            AccountMeta::writable(self.accounts.mint.address()),
+            AccountMeta::writable(self.accounts.token_account.address()),
+            AccountMeta::readonly_signer(self.accounts.mint_authority.address()),
         ];
 
         // Instruction data layout:
@@ -142,7 +142,7 @@ impl<'info> MintToken<'info> {
 
         let mut instruction_data = [0; 10];
         {
-            let binding = self.accounts.mint.try_borrow_data()?;
+            let binding = self.accounts.mint.try_borrow()?;
             let mint_state = StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&binding)
                 .map_err(|_| ProgramError::InvalidAccountData)?;
 
@@ -152,7 +152,7 @@ impl<'info> MintToken<'info> {
         }
 
         let instruction = pinocchio::instruction::Instruction {
-            program_id: &self.accounts.token_program.key(),
+            program_id: self.accounts.token_program.address(),
             accounts: &account_metas,
             data: &instruction_data,
         };

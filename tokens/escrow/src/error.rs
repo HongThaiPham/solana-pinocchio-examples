@@ -1,4 +1,4 @@
-use pinocchio::error::ProgramError;
+use error::ProgramError;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum EscrowError {

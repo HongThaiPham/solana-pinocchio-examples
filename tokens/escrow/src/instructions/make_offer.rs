@@ -1,7 +1,7 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountView,
+    AccountView,
     instruction::{Seed, Signer},
     error::ProgramError,
     Address::find_program_address,
@@ -23,10 +23,10 @@ pub struct MakeOfferAccounts<'info> {
     pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for MakeOfferAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for MakeOfferAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [maker, token_mint_a, token_mint_b, maker_ata_a, offer, vault, token_program, system_program, _] =
             accounts
         else {
@@ -38,15 +38,15 @@ impl<'info> TryFrom<&'info [AccountView]> for MakeOfferAccounts<'info> {
             return Err(ProgramError::MissingRequiredSignature);
         }
 
-        if !token_mint_a.is_owned_by(token_program.key()) {
+        if !token_mint_a.owned_by(token_program.address()) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
-        if !token_mint_b.is_owned_by(token_program.key()) {
+        if !token_mint_b.owned_by(token_program.address()) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
-        if !maker_ata_a.is_owned_by(token_program.key()) {
+        if !maker_ata_a.owned_by(token_program.address()) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
@@ -58,15 +58,15 @@ impl<'info> TryFrom<&'info [AccountView]> for MakeOfferAccounts<'info> {
         }
 
         let (maker_ata_a_address, _) = find_program_address(
-            &[maker.key(), token_program.key(), token_mint_a.key()],
+            &[maker.address(), token_program.address(), token_mint_a.address()],
             &pinocchio_associated_token_account::ID,
         );
 
-        if maker_ata_a_address.ne(maker_ata_a.key()) {
+        if maker_ata_a_address.ne(maker_ata_a.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
-        if !offer.data_is_empty() {
+        if !offer.is_data_empty() {
             return Err(ProgramError::AccountAlreadyInitialized);
         }
 
@@ -75,15 +75,15 @@ impl<'info> TryFrom<&'info [AccountView]> for MakeOfferAccounts<'info> {
         }
 
         let (vault_address, _) = find_program_address(
-            &[offer.key(), token_program.key(), token_mint_a.key()],
+            &[offer.address(), token_program.address(), token_mint_a.address()],
             &pinocchio_associated_token_account::ID,
         );
 
-        if vault_address.ne(vault.key()) {
+        if vault_address.ne(vault.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
-        if !vault.data_is_empty() {
+        if !vault.is_data_empty() {
             return Err(ProgramError::AccountAlreadyInitialized);
         }
 
@@ -156,13 +156,13 @@ impl<'info> MakeOffer<'info> {
         let (offer_address, bump) = find_program_address(
             &[
                 Offer::SEED_PREFIX,
-                self.accounts.maker.key().as_ref(),
+                self.accounts.maker.address().as_ref(),
                 &self.instruction_datas.id,
             ],
             &crate::ID,
         );
 
-        if offer_address.ne(self.accounts.offer.key()) {
+        if offer_address.ne(self.accounts.offer.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -170,7 +170,7 @@ impl<'info> MakeOffer<'info> {
         let id_binding = self.instruction_datas.id;
         let seed = [
             Seed::from(Offer::SEED_PREFIX),
-            Seed::from(self.accounts.maker.key().as_ref()),
+            Seed::from(self.accounts.maker.address().as_ref()),
             Seed::from(&id_binding),
             Seed::from(&bump_binding),
         ];
@@ -191,9 +191,9 @@ impl<'info> MakeOffer<'info> {
             let offer = Offer::load_mut(data.as_mut())?;
             offer.set_inner(
                 self.instruction_datas.id,
-                *self.accounts.maker.key(),
-                *self.accounts.token_mint_a.key(),
-                *self.accounts.token_mint_b.key(),
+                *self.accounts.maker.address(),
+                *self.accounts.token_mint_a.address(),
+                *self.accounts.token_mint_b.address(),
                 self.instruction_datas.token_b_wanted_amount,
                 bump,
             );

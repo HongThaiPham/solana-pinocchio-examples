@@ -16,10 +16,10 @@ pub struct TransferIxsAccounts<'info> {
     pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for TransferIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for TransferIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [from, mint, to, from_token_account, to_token_account, associated_token_program, token_program, system_program] =
             accounts
         else {
@@ -36,7 +36,7 @@ impl<'info> TryFrom<&'info [AccountView]> for TransferIxsAccounts<'info> {
         }
 
         // check mint owner is token program
-        if !mint.is_owned_by(token_program.key()) {
+        if !mint.owned_by(token_program.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -45,7 +45,7 @@ impl<'info> TryFrom<&'info [AccountView]> for TransferIxsAccounts<'info> {
             return Err(ProgramError::InvalidAccountData);
         }
 
-        if from_token_account.data_is_empty() {
+        if from_token_account.is_data_empty() {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -60,7 +60,7 @@ impl<'info> TryFrom<&'info [AccountView]> for TransferIxsAccounts<'info> {
         }
 
         // //check system_program is a valid system program
-        if !system_program.key().eq(&pinocchio_system::ID) {
+        if !system_program.address().eq(&pinocchio_system::ID) {
             return Err(ProgramError::IncorrectProgramId);
         }
 
@@ -123,7 +123,7 @@ impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for Transfer<'info> {
 
 impl<'info> Transfer<'info> {
     pub fn handler(&mut self) -> ProgramResult {
-        if self.accounts.to_token_account.data_is_empty() {
+        if self.accounts.to_token_account.is_data_empty() {
             pinocchio_associated_token_account::instructions::Create {
                 account: &self.accounts.to_token_account,
                 mint: &self.accounts.mint,
@@ -136,10 +136,10 @@ impl<'info> Transfer<'info> {
         }
 
         let account_metas: [AccountMeta; 4] = [
-            AccountMeta::writable(self.accounts.from_token_account.key()),
-            AccountMeta::readonly(self.accounts.mint.key()),
-            AccountMeta::writable(self.accounts.to_token_account.key()),
-            AccountMeta::readonly_signer(self.accounts.from.key()),
+            AccountMeta::writable(self.accounts.from_token_account.address()),
+            AccountMeta::readonly(self.accounts.mint.address()),
+            AccountMeta::writable(self.accounts.to_token_account.address()),
+            AccountMeta::readonly_signer(self.accounts.from.address()),
         ];
 
         // instruction data
@@ -149,7 +149,7 @@ impl<'info> Transfer<'info> {
 
         let mut instruction_data = [0; 10];
         {
-            let binding = self.accounts.mint.try_borrow_data()?;
+            let binding = self.accounts.mint.try_borrow()?;
             let mint_state = StateWithExtensions::<spl_token_2022::state::Mint>::unpack(&binding)
                 .map_err(|_| ProgramError::InvalidAccountData)?;
 
@@ -159,7 +159,7 @@ impl<'info> Transfer<'info> {
         }
 
         let instruction = pinocchio::instruction::Instruction {
-            program_id: &self.accounts.token_program.key(),
+            program_id: self.accounts.token_program.address(),
             accounts: &account_metas,
             data: &instruction_data,
         };

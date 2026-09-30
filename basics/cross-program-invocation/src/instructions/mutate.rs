@@ -29,10 +29,10 @@ pub struct MutateCounterIxsAccounts<'info> {
     pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for MutateCounterIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for MutateCounterIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [maker, counter, counter_program, system_program] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -50,10 +50,10 @@ pub struct Mutate<'info> {
     pub accounts: MutateCounterIxsAccounts<'info>,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for Mutate<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for Mutate<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let accounts = MutateCounterIxsAccounts::try_from(accounts)?;
 
         Ok(Self { accounts })
@@ -63,9 +63,9 @@ impl<'info> TryFrom<&'info [AccountView]> for Mutate<'info> {
 impl<'info> Mutate<'info> {
     pub fn handler(&mut self, action: MutationType) -> ProgramResult {
         let account_metas: [AccountMeta; 3] = [
-            AccountMeta::writable_signer(self.accounts.maker.key()),
-            AccountMeta::writable(self.accounts.counter.key()),
-            AccountMeta::readonly(self.accounts.system_program.key()),
+            AccountMeta::writable_signer(self.accounts.maker.address()),
+            AccountMeta::writable(self.accounts.counter.address()),
+            AccountMeta::readonly(self.accounts.system_program.address()),
         ];
 
         match action {
@@ -80,7 +80,7 @@ impl<'info> Mutate<'info> {
         let mut instruction_data = [0; 1];
         instruction_data[0] = 1; // Instruction discriminator for Increase
         let instruction = pinocchio::instruction::Instruction {
-            program_id: &self.accounts.counter_program.key(),
+            program_id: self.accounts.counter_program.address(),
             accounts: &account_metas,
             data: &instruction_data,
         };
@@ -92,7 +92,7 @@ impl<'info> Mutate<'info> {
         let mut instruction_data = [0; 1];
         instruction_data[0] = 2; // Instruction discriminator for Decrease
         let instruction = pinocchio::instruction::Instruction {
-            program_id: &self.accounts.counter_program.key(),
+            program_id: self.accounts.counter_program.address(),
             accounts: &account_metas,
             data: &instruction_data,
         };

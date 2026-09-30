@@ -1,7 +1,7 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountView,
+    AccountView,
     instruction::{Seed, Signer},
     error::ProgramError,
     Address::find_program_address,
@@ -16,10 +16,10 @@ pub struct InitMintAuthorityAccounts<'info> {
     pub mint_authority: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for InitMintAuthorityAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for InitMintAuthorityAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [payer, mint_authority, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -29,14 +29,14 @@ impl<'info> TryFrom<&'info [AccountView]> for InitMintAuthorityAccounts<'info> {
             return Err(ProgramError::MissingRequiredSignature);
         }
 
-        if !mint_authority.data_is_empty() {
+        if !mint_authority.is_data_empty() {
             return Err(ProgramError::AccountAlreadyInitialized);
         }
 
         let (mint_authority_key, _) =
             find_program_address(&[MintAuthority::SEED_PREFIX], &crate::ID);
 
-        if mint_authority_key.ne(mint_authority.key()) {
+        if mint_authority_key.ne(mint_authority.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 

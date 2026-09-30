@@ -1,5 +1,5 @@
 use pinocchio::{
-    account_info::AccountView,
+    AccountView,
     instruction::{Seed, Signer},
     error::ProgramError,
     Address::find_program_address,
@@ -23,10 +23,10 @@ pub struct TakeOfferAccounts<'info> {
     pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for TakeOfferAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for TakeOfferAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [taker, token_mint_a, token_mint_b, taker_ata_a, taker_ata_b, maker, maker_ata_b, offer, vault, token_program, system_program, _] =
             accounts
         else {
@@ -38,15 +38,15 @@ impl<'info> TryFrom<&'info [AccountView]> for TakeOfferAccounts<'info> {
             return Err(ProgramError::MissingRequiredSignature);
         }
 
-        if !token_mint_a.is_owned_by(token_program.key()) {
+        if !token_mint_a.owned_by(token_program.address()) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
-        if !token_mint_b.is_owned_by(token_program.key()) {
+        if !token_mint_b.owned_by(token_program.address()) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
-        if !taker_ata_a.is_owned_by(token_program.key()) {
+        if !taker_ata_a.owned_by(token_program.address()) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
@@ -58,15 +58,15 @@ impl<'info> TryFrom<&'info [AccountView]> for TakeOfferAccounts<'info> {
         }
 
         let (taker_ata_a_address, _) = find_program_address(
-            &[taker.key(), token_program.key(), token_mint_a.key()],
+            &[taker.address(), token_program.address(), token_mint_a.address()],
             &pinocchio_associated_token_account::ID,
         );
 
-        if taker_ata_a_address.ne(taker_ata_a.key()) {
+        if taker_ata_a_address.ne(taker_ata_a.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
-        if offer.data_is_empty() {
+        if offer.is_data_empty() {
             return Err(ProgramError::UninitializedAccount);
         }
 
@@ -74,38 +74,38 @@ impl<'info> TryFrom<&'info [AccountView]> for TakeOfferAccounts<'info> {
             return Err(ProgramError::InvalidAccountData);
         }
 
-        let data = offer.try_borrow_data()?;
+        let data = offer.try_borrow()?;
         let offer_data = Offer::load(&data)?;
         let (offer_address, bump) = find_program_address(
-            &[Offer::SEED_PREFIX, maker.key().as_ref(), &offer_data.id],
+            &[Offer::SEED_PREFIX, maker.address().as_ref(), &offer_data.id],
             &crate::ID,
         );
 
-        if !offer.is_owned_by(&crate::ID) {
+        if !offer.owned_by(&crate::ID) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
-        if offer_address.ne(offer.key()) {
+        if offer_address.ne(offer.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
-        if offer_data.token_mint_a.ne(token_mint_a.key())
-            || offer_data.token_mint_b.ne(token_mint_b.key())
+        if offer_data.token_mint_a.ne(token_mint_a.address())
+            || offer_data.token_mint_b.ne(token_mint_b.address())
             || offer_data.bump != bump
         {
             return Err(ProgramError::InvalidAccountData);
         }
 
         let (vault_address, _) = find_program_address(
-            &[offer.key(), token_program.key(), token_mint_a.key()],
+            &[offer.address(), token_program.address(), token_mint_a.address()],
             &pinocchio_associated_token_account::ID,
         );
 
-        if vault_address.ne(vault.key()) {
+        if vault_address.ne(vault.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
-        if vault.data_is_empty() {
+        if vault.is_data_empty() {
             return Err(ProgramError::UninitializedAccount);
         }
 
@@ -147,11 +147,11 @@ impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for TakeOffer<'info> {
 
 impl<'info> TakeOffer<'info> {
     pub fn handler(&mut self) -> ProgramResult {
-        let data = self.accounts.offer.try_borrow_data()?;
+        let data = self.accounts.offer.try_borrow()?;
         let offer = Offer::load(&data)?;
 
         {
-            if self.accounts.maker_ata_b.data_is_empty() {
+            if self.accounts.maker_ata_b.is_data_empty() {
                 pinocchio_associated_token_account::instructions::Create {
                     account: self.accounts.maker_ata_b,
                     funding_account: self.accounts.taker,
@@ -178,7 +178,7 @@ impl<'info> TakeOffer<'info> {
         let id_binding = offer.id;
         let seed = [
             Seed::from(Offer::SEED_PREFIX),
-            Seed::from(self.accounts.maker.key().as_ref()),
+            Seed::from(self.accounts.maker.address().as_ref()),
             Seed::from(&id_binding),
             Seed::from(&bump_binding),
         ];

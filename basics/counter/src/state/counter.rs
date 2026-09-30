@@ -1,5 +1,5 @@
 use bytemuck::{Pod, Zeroable};
-use pinocchio::error::ProgramError;
+use error::ProgramError;
 
 #[repr(C)] //keeps the struct layout the same across different architectures
 #[derive(Clone, Copy, Pod, Zeroable)]

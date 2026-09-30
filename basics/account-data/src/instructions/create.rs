@@ -1,6 +1,6 @@
 use pinocchio::{
-    account_info::AccountView,
-    pinocchio::error::ProgramError,
+    AccountView,
+    error::ProgramError,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };
@@ -43,7 +43,7 @@ impl<'info> Create<'info> {
         // write data to address info account
         let address_info_state = unsafe {
             bytemuck::try_from_bytes_mut::<AddressInfo>(
-                self.accounts.address_info.borrow_mut_data_unchecked(),
+                self.accounts.address_info.try_borrow_mut()(),
             )
             .map_err(|_| ProgramError::InvalidAccountData)?
         };

@@ -8,10 +8,10 @@ pub struct GetPdaIxsAccounts<'info> {
     pub favorites: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for GetPdaIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for GetPdaIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [user, favorites] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -27,7 +27,7 @@ impl<'info> TryFrom<&'info [AccountView]> for GetPdaIxsAccounts<'info> {
         }
 
         //check account has the correct owner
-        if !favorites.is_owned_by(&crate::ID) {
+        if !favorites.owned_by(&crate::ID) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
@@ -39,10 +39,10 @@ pub struct GetPda<'info> {
     pub accounts: GetPdaIxsAccounts<'info>,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for GetPda<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for GetPda<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let accounts = GetPdaIxsAccounts::try_from(accounts)?;
 
         Ok(Self { accounts })
@@ -53,22 +53,22 @@ impl<'info> GetPda<'info> {
     pub fn handler(&mut self) -> ProgramResult {
         let favorites = unsafe {
             bytemuck::try_from_bytes_mut::<Favorites>(
-                self.accounts.favorites.borrow_mut_data_unchecked(),
+                self.accounts.favorites.try_borrow_mut()(),
             )
             .map_err(|_| ProgramError::InvalidAccountData)?
         };
 
-        let seeds = &[FAVORITES_SEED, self.accounts.user.key().as_ref()];
+        let seeds = &[FAVORITES_SEED, self.accounts.user.address().as_ref()];
         let (favorites_pubkey, _) = Address::find_program_address(seeds, &crate::ID);
 
-        if self.accounts.favorites.key().ne(&favorites_pubkey) {
+        if self.accounts.favorites.address().ne(&favorites_pubkey) {
             return Err(ProgramError::InvalidAccountData);
         }
 
         // log account data
         log!(
             "User {}'s favorite number is {}, favorite color is: {}",
-            self.accounts.user.key(),
+            self.accounts.user.address(),
             u64::from_le_bytes(favorites.number),
             bytemuck::from_bytes::<[u8; 50]>(&favorites.color),
         );

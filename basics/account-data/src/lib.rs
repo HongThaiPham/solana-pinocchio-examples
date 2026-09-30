@@ -7,7 +7,7 @@ pub mod constants;
 pub mod instructions;
 pub mod processor;
 pub mod state;
-pinocchio_Address::declare_id!("EAUvJAw61MTaJbyV4tqFB4dEZuYHdYrtpGQ35hDsQ6Dw");
+pinocchio::address::declare_id!("EAUvJAw61MTaJbyV4tqFB4dEZuYHdYrtpGQ35hDsQ6Dw");
 
 program_entrypoint!(process_instruction);
 no_allocator!();

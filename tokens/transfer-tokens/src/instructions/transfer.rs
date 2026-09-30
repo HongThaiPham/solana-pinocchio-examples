@@ -13,10 +13,10 @@ pub struct TransferIxsAccounts<'info> {
     pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for TransferIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for TransferIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [from, mint, to, from_token_account, to_token_account, associated_token_program, token_program, system_program] =
             accounts
         else {
@@ -33,7 +33,7 @@ impl<'info> TryFrom<&'info [AccountView]> for TransferIxsAccounts<'info> {
         }
 
         // check mint owner is token program
-        if !mint.is_owned_by(token_program.key()) {
+        if !mint.owned_by(token_program.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -42,7 +42,7 @@ impl<'info> TryFrom<&'info [AccountView]> for TransferIxsAccounts<'info> {
             return Err(ProgramError::InvalidAccountData);
         }
 
-        if from_token_account.data_is_empty() {
+        if from_token_account.is_data_empty() {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -57,7 +57,7 @@ impl<'info> TryFrom<&'info [AccountView]> for TransferIxsAccounts<'info> {
         }
 
         // //check system_program is a valid system program
-        if !system_program.key().eq(&pinocchio_system::ID) {
+        if !system_program.address().eq(&pinocchio_system::ID) {
             return Err(ProgramError::IncorrectProgramId);
         }
 
@@ -126,7 +126,7 @@ impl<'info> Transfer<'info> {
             }
         }
 
-        if self.accounts.to_token_account.data_is_empty() {
+        if self.accounts.to_token_account.is_data_empty() {
             pinocchio_associated_token_account::instructions::Create {
                 account: &self.accounts.to_token_account,
                 mint: &self.accounts.mint,

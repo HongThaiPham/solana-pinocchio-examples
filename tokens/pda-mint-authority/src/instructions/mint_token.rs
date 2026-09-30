@@ -1,7 +1,7 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountView,
+    AccountView,
     instruction::{Seed, Signer},
     error::ProgramError,
     Address::find_program_address,
@@ -22,10 +22,10 @@ pub struct MintTokenIxsAccounts<'info> {
     pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for MintTokenIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for MintTokenIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [payer, mint, to, mint_authority, token_account, associated_token_program, token_program, system_program] =
             accounts
         else {
@@ -42,7 +42,7 @@ impl<'info> TryFrom<&'info [AccountView]> for MintTokenIxsAccounts<'info> {
         }
 
         // check mint owner is token program
-        if !mint.is_owned_by(token_program.key()) {
+        if !mint.owned_by(token_program.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -51,7 +51,7 @@ impl<'info> TryFrom<&'info [AccountView]> for MintTokenIxsAccounts<'info> {
 
         if mint_info
             .mint_authority()
-            .is_some_and(|authority| !mint_authority.key().eq(authority))
+            .is_some_and(|authority| !mint_authority.address().eq(authority))
         {
             return Err(ProgramError::IncorrectAuthority);
         }
@@ -61,9 +61,9 @@ impl<'info> TryFrom<&'info [AccountView]> for MintTokenIxsAccounts<'info> {
             return Err(ProgramError::InvalidAccountData);
         }
 
-        if !token_account.data_is_empty() {
+        if !token_account.is_data_empty() {
             let token_account_info = TokenAccount::from_account_info(token_account)?;
-            if !token_account_info.owner().eq(to.key()) {
+            if !token_account_info.owner().eq(to.address()) {
                 return Err(ProgramError::InvalidAccountData);
             }
         }
@@ -79,21 +79,21 @@ impl<'info> TryFrom<&'info [AccountView]> for MintTokenIxsAccounts<'info> {
         }
 
         // //check system_program is a valid system program
-        if !system_program.key().eq(&pinocchio_system::ID) {
+        if !system_program.address().eq(&pinocchio_system::ID) {
             return Err(ProgramError::IncorrectProgramId);
         }
 
-        if mint_authority.data_is_empty() {
+        if mint_authority.is_data_empty() {
             return Err(ProgramError::UninitializedAccount);
         }
-        if !mint_authority.is_owned_by(&crate::ID) {
+        if !mint_authority.owned_by(&crate::ID) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
         let (mint_authority_key, _) =
             find_program_address(&[MintAuthority::SEED_PREFIX], &crate::ID);
 
-        if mint_authority_key.ne(mint_authority.key()) {
+        if mint_authority_key.ne(mint_authority.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -156,7 +156,7 @@ impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for MintToken<'info> {
 
 impl<'info> MintToken<'info> {
     pub fn handler(&mut self) -> ProgramResult {
-        if self.accounts.token_account.data_is_empty() {
+        if self.accounts.token_account.is_data_empty() {
             pinocchio_associated_token_account::instructions::Create {
                 account: &self.accounts.token_account,
                 mint: &self.accounts.mint,
@@ -168,7 +168,7 @@ impl<'info> MintToken<'info> {
             .invoke()?;
         }
 
-        let data = self.accounts.mint_authority.try_borrow_data()?;
+        let data = self.accounts.mint_authority.try_borrow()?;
         let mint_authority = MintAuthority::load(&data)?;
 
         let bump_binding = [mint_authority.bump];

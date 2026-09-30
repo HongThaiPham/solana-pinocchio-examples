@@ -2,12 +2,12 @@
 #![no_std]
 
 use pinocchio::{
-    account_info::AccountView, no_allocator, nostd_panic_handler, program_entrypoint,
+    AccountView, no_allocator, nostd_panic_handler, program_entrypoint,
     Address, ProgramResult,
 };
 use pinocchio_log::log;
 
-pinocchio_Address::declare_id!("FpFC3vEsjXKTrLweeD9PaG4HpTqMNJNoMvSVcZVJ8JCT");
+pinocchio::address::declare_id!("FpFC3vEsjXKTrLweeD9PaG4HpTqMNJNoMvSVcZVJ8JCT");
 
 program_entrypoint!(process_instruction);
 no_allocator!();

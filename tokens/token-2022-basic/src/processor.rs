@@ -1,6 +1,4 @@
-use pinocchio::{
-    account_info::AccountView, pinocchio::error::ProgramError, Address, ProgramResult,
-};
+use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
 use pinocchio_log::log;
 
@@ -9,7 +7,7 @@ use crate::instructions::{create_token, mint_token, transfer, Instruction};
 #[inline(always)]
 pub fn process_instruction(
     program_id: &Address,
-    accounts: &[AccountView],
+    accounts: &mut [AccountView],
     instruction_data: &[u8],
 ) -> ProgramResult {
     // Validate program ID

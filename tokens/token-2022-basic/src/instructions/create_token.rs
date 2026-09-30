@@ -13,10 +13,10 @@ pub struct CreateTokenIxsAccounts<'info> {
     pub token_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for CreateTokenIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for CreateTokenIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [payer, mint, token_program, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -99,11 +99,11 @@ impl<'info> CreateToken<'info> {
             to: self.accounts.mint,
             space: spl_token_2022::state::Mint::SIZE_OF as u64,
             lamports: Rent::get()?.minimum_balance(spl_token_2022::state::Mint::SIZE_OF),
-            owner: &self.accounts.token_program.key(),
+            owner: self.accounts.token_program.address(),
         }
         .invoke()?;
 
-        let account_metas: [AccountMeta; 1] = [AccountMeta::writable(self.accounts.mint.key())];
+        let account_metas: [AccountMeta; 1] = [AccountMeta::writable(self.accounts.mint.address())];
 
         // Instruction data layout:
         // -  [0]: instruction discriminator (1 byte, u8)
@@ -115,13 +115,13 @@ impl<'info> CreateToken<'info> {
         let mut instruction_data = [0; 67];
         instruction_data[0] = 20; // Instruction discriminator for InitializeMint2
         instruction_data[1] = self.instruction_datas.token_decimals;
-        instruction_data[2..34].copy_from_slice(self.accounts.payer.key());
+        instruction_data[2..34].copy_from_slice(self.accounts.payer.address().as_ref());
         instruction_data[34] = 1; // Freeze authority presence flag (1 byte, u8)
 
-        instruction_data[35..67].copy_from_slice(self.accounts.payer.key());
+        instruction_data[35..67].copy_from_slice(self.accounts.payer.address().as_ref());
 
         let instruction = pinocchio::instruction::Instruction {
-            program_id: &self.accounts.token_program.key(),
+            program_id: self.accounts.token_program.address(),
             accounts: &account_metas,
             data: &instruction_data,
         };

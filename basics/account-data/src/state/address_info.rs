@@ -1,5 +1,5 @@
 use bytemuck::{Pod, Zeroable};
-use pinocchio::{account_info::AccountView, pinocchio::error::ProgramError};
+use pinocchio::{AccountView, error::ProgramError};
 
 pub struct CreateAddressInfoAccounts<'info> {
     pub payer: &'info AccountView,
@@ -27,10 +27,10 @@ impl AddressInfo {
     }
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for CreateAddressInfoAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for CreateAddressInfoAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [payer, address_info, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };

@@ -11,10 +11,10 @@ pub struct CreateCounterIxsAccounts<'info> {
     pub system_program: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for CreateCounterIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for CreateCounterIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [maker, counter, counter_program, system_program] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -74,9 +74,9 @@ impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for Create<'info> {
 impl<'info> Create<'info> {
     pub fn handler(&mut self) -> ProgramResult {
         let account_metas: [AccountMeta; 3] = [
-            AccountMeta::writable_signer(self.accounts.maker.key()),
-            AccountMeta::writable(self.accounts.counter.key()),
-            AccountMeta::readonly(self.accounts.system_program.key()),
+            AccountMeta::writable_signer(self.accounts.maker.address()),
+            AccountMeta::writable(self.accounts.counter.address()),
+            AccountMeta::readonly(self.accounts.system_program.address()),
         ];
 
         // instruction data
@@ -90,7 +90,7 @@ impl<'info> Create<'info> {
         log!("Create instruction data: {}", &instruction_data);
 
         let instruction = pinocchio::instruction::Instruction {
-            program_id: &self.accounts.counter_program.key(),
+            program_id: self.accounts.counter_program.address(),
             accounts: &account_metas,
             data: &instruction_data,
         };

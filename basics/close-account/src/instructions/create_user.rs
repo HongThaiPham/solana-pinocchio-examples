@@ -1,9 +1,9 @@
 use core::mem::transmute;
 
 use pinocchio::{
-    account_info::AccountView,
+    AccountView,
     instruction::{Seed, Signer},
-    pinocchio::error::ProgramError,
+    error::ProgramError,
     Address::find_program_address,
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
@@ -16,10 +16,10 @@ pub struct CreateUserAccounts<'info> {
     pub target_account: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for CreateUserAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for CreateUserAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [payer, target_account, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -90,18 +90,18 @@ impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for CreateUser<'info> {
 impl<'info> CreateUser<'info> {
     pub fn handler(&mut self) -> ProgramResult {
         let (t_account, bump) = find_program_address(
-            &[User::SEED_PREFIX, self.accounts.payer.key().as_ref()],
+            &[User::SEED_PREFIX, self.accounts.payer.address().as_ref()],
             &crate::ID,
         );
 
-        if t_account.ne(self.accounts.target_account.key()) {
+        if t_account.ne(self.accounts.target_account.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 
         let bump_binding = [bump];
         let seed = [
             Seed::from(User::SEED_PREFIX),
-            Seed::from(self.accounts.payer.key().as_ref()),
+            Seed::from(self.accounts.payer.address().as_ref()),
             Seed::from(&bump_binding),
         ];
         let signer_seeds = Signer::from(&seed);

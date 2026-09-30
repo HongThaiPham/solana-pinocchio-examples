@@ -1,6 +1,6 @@
 use bytemuck::{Pod, Zeroable};
 use pinocchio::{
-    account_info::AccountView,
+    AccountView,
     instruction::{Seed, Signer},
     error::ProgramError,
     pubkey,
@@ -15,10 +15,10 @@ pub struct CreateCounterIxsAccounts<'info> {
     pub counter: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for CreateCounterIxsAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for CreateCounterIxsAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [maker, counter, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -91,7 +91,7 @@ impl<'info> Create<'info> {
         )
         .map_err(|_| ProgramError::InvalidSeeds)?;
 
-        if self.accounts.counter.key() != &counter_pubkey {
+        if self.accounts.counter.address() != &counter_pubkey {
             return Err(ProgramError::InvalidAccountData);
         }
         let bump = [self.instruction_datas.bump as u8];
@@ -111,7 +111,7 @@ impl<'info> Create<'info> {
         // write the initial data to the counter account
         let counter = unsafe {
             bytemuck::try_from_bytes_mut::<Counter>(
-                self.accounts.counter.borrow_mut_data_unchecked(),
+                self.accounts.counter.try_borrow_mut()(),
             )
             .map_err(|_| ProgramError::InvalidAccountData)?
         };

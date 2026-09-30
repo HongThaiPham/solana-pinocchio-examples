@@ -2,7 +2,7 @@ pub mod create;
 
 pub use create::*;
 
-use pinocchio::error::ProgramError;
+use error::ProgramError;
 
 #[repr(u8)]
 pub enum Instruction {

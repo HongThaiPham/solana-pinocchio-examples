@@ -1,5 +1,5 @@
 use pinocchio::{
-    account_info::AccountView, pinocchio::error::ProgramError, Address::find_program_address,
+    AccountView, error::ProgramError, Address::find_program_address,
     ProgramResult,
 };
 
@@ -10,10 +10,10 @@ pub struct CloseUserAccounts<'info> {
     pub target_account: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for CloseUserAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for CloseUserAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [payer, target_account, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -31,7 +31,7 @@ impl<'info> TryFrom<&'info [AccountView]> for CloseUserAccounts<'info> {
             return Err(ProgramError::UninitializedAccount);
         }
 
-        if !target_account.is_owned_by(&crate::ID) {
+        if !target_account.owned_by(&crate::ID) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
@@ -46,10 +46,10 @@ pub struct CloseUser<'info> {
     pub accounts: CloseUserAccounts<'info>,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for CloseUser<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for CloseUser<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let accounts = CloseUserAccounts::try_from(accounts)?;
 
         Ok(Self { accounts })
@@ -59,11 +59,11 @@ impl<'info> TryFrom<&'info [AccountView]> for CloseUser<'info> {
 impl<'info> CloseUser<'info> {
     pub fn handler(&mut self) -> ProgramResult {
         let (t_account, _) = find_program_address(
-            &[User::SEED_PREFIX, self.accounts.payer.key().as_ref()],
+            &[User::SEED_PREFIX, self.accounts.payer.address().as_ref()],
             &crate::ID,
         );
 
-        if t_account.ne(self.accounts.target_account.key()) {
+        if t_account.ne(self.accounts.target_account.address()) {
             return Err(ProgramError::InvalidAccountData);
         }
 

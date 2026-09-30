@@ -1,16 +1,16 @@
 use core::mem::transmute;
 
-use pinocchio::{account_info::AccountView, pinocchio::error::ProgramError};
+use pinocchio::{AccountView, error::ProgramError};
 
 pub struct TransferSolAccounts<'info> {
     pub payer: &'info AccountView,
     pub recipient: &'info AccountView,
 }
 
-impl<'info> TryFrom<&'info [AccountView]> for TransferSolAccounts<'info> {
+impl<'info> TryFrom<&'info mut [AccountView]> for TransferSolAccounts<'info> {
     type Error = ProgramError;
 
-    fn try_from(accounts: &'info [AccountView]) -> Result<Self, Self::Error> {
+    fn try_from(accounts: &'info mut [AccountView]) -> Result<Self, Self::Error> {
         let [payer, recipient, _] = accounts else {
             return Err(ProgramError::NotEnoughAccountKeys);
         };
@@ -24,7 +24,7 @@ impl<'info> TryFrom<&'info [AccountView]> for TransferSolAccounts<'info> {
             return Err(ProgramError::InvalidAccountData);
         }
 
-        if !recipient.is_owned_by(&pinocchio_system::ID) {
+        if !recipient.owned_by(&pinocchio_system::ID) {
             return Err(ProgramError::InvalidAccountOwner);
         }
 
