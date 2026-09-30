@@ -69,11 +69,11 @@ pub struct CreatePda<'info> {
     pub instruction_datas: CreatePdaInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for CreatePda<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for CreatePda<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountView], &'info [u8]),
+        (accounts, data): (&'info mut [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = CreatePdaIxsAccounts::try_from(accounts)?;
         let instruction_datas = CreatePdaInstructionData::try_from(data)?;

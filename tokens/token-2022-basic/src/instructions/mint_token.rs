@@ -99,11 +99,11 @@ pub struct MintToken<'info> {
     pub instruction_datas: MintTokenInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for MintToken<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for MintToken<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountView], &'info [u8]),
+        (accounts, data): (&'info mut [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = MintTokenIxsAccounts::try_from(accounts)?;
         let instruction_datas = MintTokenInstructionData::try_from(data)?;

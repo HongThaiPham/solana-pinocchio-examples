@@ -8,11 +8,11 @@ pub struct TransferSolWithCpi<'info> {
     pub instruction_datas: TransferSolInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for TransferSolWithCpi<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for TransferSolWithCpi<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountView], &'info [u8]),
+        (accounts, data): (&'info mut [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = TransferSolAccounts::try_from(accounts)?;
         let instruction_datas = TransferSolInstructionData::try_from(data)?;

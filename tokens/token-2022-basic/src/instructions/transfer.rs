@@ -105,11 +105,11 @@ pub struct Transfer<'info> {
     pub instruction_datas: TransferInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for Transfer<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for Transfer<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountView], &'info [u8]),
+        (accounts, data): (&'info mut [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = TransferIxsAccounts::try_from(accounts)?;
         let instruction_datas = TransferInstructionData::try_from(data)?;

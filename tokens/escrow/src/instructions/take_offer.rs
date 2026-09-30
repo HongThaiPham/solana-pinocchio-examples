@@ -5,7 +5,7 @@ use pinocchio::{
     Address::find_program_address,
     ProgramResult,
 };
-use pinocchio_token::state::{Mint, TokenAccount};
+use pinocchio_token::state::{Account, Mint};
 
 use crate::state::Offer;
 
@@ -133,7 +133,7 @@ pub struct TakeOffer<'info> {
     pub accounts: TakeOfferAccounts<'info>,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for TakeOffer<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for TakeOffer<'info> {
     type Error = ProgramError;
 
     fn try_from(
@@ -169,7 +169,7 @@ impl<'info> TakeOffer<'info> {
                 authority: self.accounts.taker,
                 mint: self.accounts.token_mint_b,
                 amount: u64::from_le_bytes(offer.token_b_wanted_amount),
-                decimals: Mint::from_account_info(self.accounts.token_mint_b)?.decimals(),
+                decimals: Mint::from_account_view(self.accounts.token_mint_b)?.decimals(),
             }
             .invoke()?;
         }
@@ -186,7 +186,7 @@ impl<'info> TakeOffer<'info> {
 
         {
             let amount = {
-                let vault_account = TokenAccount::from_account_info(self.accounts.vault)?;
+                let vault_account = Account::from_account_view(self.accounts.vault)?;
                 vault_account.amount()
             };
 
@@ -196,7 +196,7 @@ impl<'info> TakeOffer<'info> {
                 authority: self.accounts.offer,
                 mint: self.accounts.token_mint_a,
                 amount: amount,
-                decimals: Mint::from_account_info(self.accounts.token_mint_a)?.decimals(),
+                decimals: Mint::from_account_view(self.accounts.token_mint_a)?.decimals(),
             }
             .invoke_signed(&[signer_seeds.clone()])?;
 
@@ -212,7 +212,7 @@ impl<'info> TakeOffer<'info> {
         // close offer account
         {
             {
-                let mut data = self.accounts.offer.try_borrow_mut_data()?;
+                let mut data = self.accounts.offer.try_borrow_mut()?;
                 data[0] = 0xff;
             }
 

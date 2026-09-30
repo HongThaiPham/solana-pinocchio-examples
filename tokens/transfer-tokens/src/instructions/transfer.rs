@@ -1,6 +1,6 @@
 use bytemuck::{Pod, Zeroable};
 use pinocchio::{error::ProgramError, AccountView, ProgramResult};
-use pinocchio_token::state::{Mint, TokenAccount};
+use pinocchio_token::state::{Account, Mint};
 pub struct TransferIxsAccounts<'info> {
     pub from: &'info AccountView,
     pub mint: &'info AccountView,
@@ -100,11 +100,11 @@ pub struct Transfer<'info> {
     pub instruction_datas: TransferInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for Transfer<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for Transfer<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountView], &'info [u8]),
+        (accounts, data): (&'info mut [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = TransferIxsAccounts::try_from(accounts)?;
         let instruction_datas = TransferInstructionData::try_from(data)?;
@@ -120,7 +120,7 @@ impl<'info> Transfer<'info> {
     pub fn handler(&mut self) -> ProgramResult {
         {
             let from_token_account =
-                TokenAccount::from_account_info(self.accounts.from_token_account)?;
+                Account::from_account_view(self.accounts.from_token_account)?;
             if from_token_account.amount() < u64::from_le_bytes(self.instruction_datas.amount) {
                 return Err(ProgramError::InsufficientFunds);
             }
@@ -144,7 +144,7 @@ impl<'info> Transfer<'info> {
             to: &self.accounts.to_token_account,
             amount: u64::from_le_bytes(self.instruction_datas.amount),
             authority: &self.accounts.from,
-            decimals: Mint::from_account_info(self.accounts.mint)?.decimals(),
+            decimals: Mint::from_account_view(self.accounts.mint)?.decimals(),
         }
         .invoke()?;
         Ok(())

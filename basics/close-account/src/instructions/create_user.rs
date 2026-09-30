@@ -71,11 +71,11 @@ pub struct CreateUser<'info> {
     pub instruction_datas: CreateUserInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for CreateUser<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for CreateUser<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountView], &'info [u8]),
+        (accounts, data): (&'info mut [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = CreateUserAccounts::try_from(accounts)?;
         let instruction_datas = CreateUserInstructionData::try_from(data)?;
@@ -118,7 +118,7 @@ impl<'info> CreateUser<'info> {
 
         // write data to target account
 
-        let mut data = self.accounts.target_account.try_borrow_mut_data()?;
+        let mut data = self.accounts.target_account.try_borrow_mut()?;
         let user = User::load_mut(data.as_mut())?;
         user.set_inner(self.instruction_datas.name);
         Ok(())

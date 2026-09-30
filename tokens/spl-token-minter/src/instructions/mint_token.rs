@@ -1,7 +1,7 @@
 use core::mem::transmute;
 
 use pinocchio::{error::ProgramError, AccountView, ProgramResult};
-use pinocchio_token::state::{Mint, TokenAccount};
+use pinocchio_token::state::{Account, Mint};
 pub struct MintTokenIxsAccounts<'info> {
     pub mint_authority: &'info AccountView,
     pub mint: &'info AccountView,
@@ -38,7 +38,7 @@ impl<'info> TryFrom<&'info mut [AccountView]> for MintTokenIxsAccounts<'info> {
         }
 
         // check mint_authority is signer
-        let mint_info = Mint::from_account_info(mint)?;
+        let mint_info = Mint::from_account_view(mint)?;
 
         if mint_info
             .mint_authority()
@@ -53,7 +53,7 @@ impl<'info> TryFrom<&'info mut [AccountView]> for MintTokenIxsAccounts<'info> {
         }
 
         if !token_account.is_data_empty() {
-            let token_account_info = TokenAccount::from_account_info(token_account)?;
+            let token_account_info = Account::from_account_view(token_account)?;
             if !token_account_info.owner().eq(to.address()) {
                 return Err(ProgramError::InvalidAccountData);
             }
@@ -114,11 +114,11 @@ pub struct MintToken<'info> {
     pub instruction_datas: MintTokenInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for MintToken<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for MintToken<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountView], &'info [u8]),
+        (accounts, data): (&'info mut [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = MintTokenIxsAccounts::try_from(accounts)?;
         let instruction_datas = MintTokenInstructionData::try_from(data)?;

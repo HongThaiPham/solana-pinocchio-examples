@@ -6,7 +6,7 @@ use pinocchio::{
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };
-use pinocchio_token::state::Mint;
+use pinocchio_token::state::{Account, Mint};
 pub struct CreateTokenIxsAccounts<'info> {
     pub payer: &'info AccountView,
     pub mint: &'info AccountView,
@@ -51,8 +51,8 @@ impl<'info> TryFrom<&'info mut [AccountView]> for CreateTokenIxsAccounts<'info> 
 #[derive(Clone, Copy, Pod, Zeroable)]
 pub struct CreateTokenInstructionData {
     pub token_decimals: u8,
-    pub mint_authority: Pubkey,
-    pub freeze_authority: Pubkey,
+    pub mint_authority: Address,
+    pub freeze_authority: Address,
 }
 
 impl CreateTokenInstructionData {
@@ -75,11 +75,11 @@ pub struct CreateToken<'info> {
     pub instruction_datas: CreateTokenInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for CreateToken<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for CreateToken<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountView], &'info [u8]),
+        (accounts, data): (&'info mut [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = CreateTokenIxsAccounts::try_from(accounts)?;
         let instruction_datas = CreateTokenInstructionData::try_from(data)?;

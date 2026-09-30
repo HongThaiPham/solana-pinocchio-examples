@@ -78,7 +78,7 @@ impl<'info> CloseUser<'info> {
         destination: &AccountView,
     ) -> ProgramResult {
         {
-            let mut data = account.try_borrow_mut_data()?;
+            let mut data = account.try_borrow_mut()?;
             data[0] = 0xff;
         }
 

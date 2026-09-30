@@ -76,11 +76,11 @@ pub struct CreateToken<'info> {
     pub instruction_datas: CreateTokenInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for CreateToken<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for CreateToken<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountView], &'info [u8]),
+        (accounts, data): (&'info mut [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = CreateTokenIxsAccounts::try_from(accounts)?;
         let instruction_datas = CreateTokenInstructionData::try_from(data)?;

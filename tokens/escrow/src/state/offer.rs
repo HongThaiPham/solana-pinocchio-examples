@@ -4,9 +4,9 @@ use pinocchio::{error::ProgramError, Address};
 #[derive(Clone, Copy)]
 pub struct Offer {
     pub id: [u8; 8],
-    pub maker: Pubkey,
-    pub token_mint_a: Pubkey,
-    pub token_mint_b: Pubkey,
+    pub maker: Address,
+    pub token_mint_a: Address,
+    pub token_mint_b: Address,
     pub token_b_wanted_amount: [u8; 8],
     pub bump: u8,
 }

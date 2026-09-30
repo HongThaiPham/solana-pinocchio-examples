@@ -75,11 +75,11 @@ pub struct InitMintAuthority<'info> {
     pub instruction_datas: InitMintAuthorityInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for InitMintAuthority<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for InitMintAuthority<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountView], &'info [u8]),
+        (accounts, data): (&'info mut [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = InitMintAuthorityAccounts::try_from(accounts)?;
         let instruction_datas = InitMintAuthorityInstructionData::try_from(data)?;
@@ -109,7 +109,7 @@ impl<'info> InitMintAuthority<'info> {
         }
         .invoke_signed(&[signer_seeds])?;
 
-        let mut data = self.accounts.mint_authority.try_borrow_mut_data()?;
+        let mut data = self.accounts.mint_authority.try_borrow_mut()?;
         let mint_authority = MintAuthority::load_mut(data.as_mut())?;
         mint_authority.set_inner(self.instruction_datas.bump);
         Ok(())

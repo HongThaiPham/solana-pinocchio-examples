@@ -8,7 +8,7 @@ use pinocchio::{
     sysvars::{rent::Rent, Sysvar},
     ProgramResult,
 };
-use pinocchio_token::state::Mint;
+use pinocchio_token::state::{Account, Mint};
 
 use crate::state::Offer;
 
@@ -135,11 +135,11 @@ pub struct MakeOffer<'info> {
     pub instruction_datas: MakeOfferInstructionData,
 }
 
-impl<'info> TryFrom<(&'info [AccountView], &'info [u8])> for MakeOffer<'info> {
+impl<'info> TryFrom<(&'info mut [AccountView], &'info [u8])> for MakeOffer<'info> {
     type Error = ProgramError;
 
     fn try_from(
-        (accounts, data): (&'info [AccountView], &'info [u8]),
+        (accounts, data): (&'info mut [AccountView], &'info [u8]),
     ) -> Result<Self, Self::Error> {
         let accounts = MakeOfferAccounts::try_from(accounts)?;
         let instruction_datas = MakeOfferInstructionData::try_from(data)?;
@@ -187,7 +187,7 @@ impl<'info> MakeOffer<'info> {
         .invoke_signed(&[signer_seeds])?;
 
         {
-            let mut data = self.accounts.offer.try_borrow_mut_data()?;
+            let mut data = self.accounts.offer.try_borrow_mut()?;
             let offer = Offer::load_mut(data.as_mut())?;
             offer.set_inner(
                 self.instruction_datas.id,
@@ -216,7 +216,7 @@ impl<'info> MakeOffer<'info> {
                 authority: self.accounts.maker,
                 mint: self.accounts.token_mint_a,
                 amount: u64::from_le_bytes(self.instruction_datas.token_a_amount),
-                decimals: Mint::from_account_info(self.accounts.token_mint_a)?.decimals(),
+                decimals: Mint::from_account_view(self.accounts.token_mint_a)?.decimals(),
             }
             .invoke()?;
         }
